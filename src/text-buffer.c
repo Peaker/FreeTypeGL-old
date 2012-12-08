@@ -31,6 +31,7 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <assert.h>
 #include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,9 +52,9 @@
 text_buffer_t *
 text_buffer_new( size_t depth )
 {
-    
+
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
-    self->buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f:2g1f" ); 
+    self->buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f:2g1f" );
     self->manager = font_manager_new( 512, 512, depth );
         self->shader = shader_load("shaders/text.vert",
                                    "shaders/text.frag");
@@ -109,7 +110,7 @@ text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
     }
 
     va_list args;
-    va_start ( args, pen ); 
+    va_start ( args, pen );
     do {
         markup = va_arg( args, markup_t * );
         if( markup == NULL )
@@ -200,7 +201,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     //  - 2 triangles for glyph
     glyph_vertex_t vertices[4*5];
     GLuint indices[6*5];
-    
+
     if( current == L'\n' )
     {
         pen->x = self->origin.x;
@@ -269,7 +270,7 @@ text_buffer_add_wchar( text_buffer_t * self,
         vcount += 4;
         icount += 6;
     }
-        
+
     // Underline
     if( markup->underline )
     {
@@ -280,7 +281,7 @@ text_buffer_add_wchar( text_buffer_t * self,
         float x0 = ( pen->x - kerning );
         float y0 = (int)( pen->y + font->underline_position );
         float x1 = ( x0 + glyph->advance_x );
-        float y1 = (int)( y0 + font->underline_thickness ); 
+        float y1 = (int)( y0 + font->underline_thickness );
         float s0 = black->s0;
         float t0 = black->t0;
         float s1 = black->s1;
@@ -313,7 +314,7 @@ text_buffer_add_wchar( text_buffer_t * self,
         vcount += 4;
         icount += 6;
     }
-    
+
     // Overline
     if( markup->overline )
     {
@@ -324,7 +325,7 @@ text_buffer_add_wchar( text_buffer_t * self,
         float x0 = ( pen->x -kerning );
         float y0 = (int)( pen->y + (int)font->ascender );
         float x1 = ( x0 + glyph->advance_x );
-        float y1 = (int)( y0 + (int)font->underline_thickness ); 
+        float y1 = (int)( y0 + (int)font->underline_thickness );
         float s0 = black->s0;
         float t0 = black->t0;
         float s1 = black->s1;
@@ -356,7 +357,7 @@ text_buffer_add_wchar( text_buffer_t * self,
         vcount += 4;
         icount += 6;
     }
-        
+
     /* Strikethrough */
     if( markup->strikethrough )
     {
@@ -367,7 +368,7 @@ text_buffer_add_wchar( text_buffer_t * self,
         float x0  = ( pen->x -kerning );
         float y0  = (int)( pen->y + (int)font->ascender*.33);
         float x1  = ( x0 + glyph->advance_x );
-        float y1  = (int)( y0 + (int)font->underline_thickness ); 
+        float y1  = (int)( y0 + (int)font->underline_thickness );
         float s0 = black->s0;
         float t0 = black->t0;
         float s1 = black->s1;
@@ -440,7 +441,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     indices[icount + 5] = vcount+3;
     vcount += 4;
     icount += 6;
-    
+
     vertex_buffer_push_back( buffer, vertices, vcount, indices, icount );
     pen->x += glyph->advance_x;
 }
