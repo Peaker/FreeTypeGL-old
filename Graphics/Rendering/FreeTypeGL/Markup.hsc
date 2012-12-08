@@ -1,7 +1,8 @@
 {-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
-module Graphics.Rendering.FreeTypeGL.Markup(Markup, Markup_S(..)) where
+module Graphics.Rendering.FreeTypeGL.Markup(Markup, Markup_S(..), Color(..)) where
 
-import Foreign (Ptr)
+import Control.Applicative
+import Foreign (Ptr, plusPtr)
 import Foreign.Storable (Storable(..))
 import Foreign.C.String (CString)
 import Foreign.C.Types (CFloat, CInt)
@@ -11,6 +12,18 @@ type Markup = Ptr Markup_S
 data TextureFont_S
 type TextureFont = Ptr TextureFont_S
 
+data Color = Color Float Float Float Float
+
+peekColor :: Ptr Float -> IO Color
+peekColor ptr = Color <$> p 0 <*> p 1 <*> p 2 <*> p 3
+  where
+    p = peekElemOff ptr
+
+pokeColor :: Ptr Float -> Color -> IO ()
+pokeColor ptr (Color r g b a) = mapM_ p $ zip [0..] [r, g, b, a]
+  where
+    p (off, val) = pokeElemOff ptr off val
+
 data Markup_S = Markup_S
   { family :: CString
   , size :: CFloat
@@ -19,16 +32,16 @@ data Markup_S = Markup_S
   , rise :: CFloat
   , spacing :: CFloat
   , gamma :: CFloat
-  , foreground_color :: Ptr Float -- [4]
-  , background_color :: Ptr Float -- [4]
+  , foreground_color :: Color -- [4]
+  , background_color :: Color -- [4]
   , outline :: CInt
-  , outline_color :: Ptr Float -- [4]
+  , outline_color :: Color -- [4]
   , underline :: CInt
-  , underline_color :: Ptr Float -- [4]
+  , underline_color :: Color -- [4]
   , overline :: CInt
-  , overline_color :: Ptr Float -- [4]
+  , overline_color :: Color -- [4]
   , strikethrough :: CInt
-  , strikethrough_color :: Ptr Float -- [4]
+  , strikethrough_color :: Color -- [4]
   , font :: TextureFont
   }
 
@@ -45,16 +58,16 @@ instance Storable Markup_S where
     rise' <- (#peek markup_t, rise) ptr
     spacing' <- (#peek markup_t, spacing) ptr
     gamma' <- (#peek markup_t, gamma) ptr
-    foreground_color' <- (#peek markup_t, foreground_color) ptr
-    background_color' <- (#peek markup_t, background_color) ptr
+    foreground_color' <- peekColor $ (#ptr markup_t, foreground_color) ptr
+    background_color' <- peekColor $ (#ptr markup_t, background_color) ptr
     outline' <- (#peek markup_t, outline) ptr
-    outline_color' <- (#peek markup_t, outline_color) ptr
+    outline_color' <- peekColor $ (#ptr markup_t, outline_color) ptr
     underline' <- (#peek markup_t, underline) ptr
-    underline_color' <- (#peek markup_t, underline_color) ptr
+    underline_color' <- peekColor $ (#ptr markup_t, underline_color) ptr
     overline' <- (#peek markup_t, overline) ptr
-    overline_color' <- (#peek markup_t, overline_color) ptr
+    overline_color' <- peekColor $ (#ptr markup_t, overline_color) ptr
     strikethrough' <- (#peek markup_t, strikethrough) ptr
-    strikethrough_color' <- (#peek markup_t, strikethrough_color) ptr
+    strikethrough_color' <- peekColor $ (#ptr markup_t, strikethrough_color) ptr
     font' <- (#peek markup_t, font) ptr
     return $ Markup_S
       family'
@@ -103,14 +116,14 @@ instance Storable Markup_S where
       (#poke markup_t, rise) ptr rise'
       (#poke markup_t, spacing) ptr spacing'
       (#poke markup_t, gamma) ptr gamma'
-      (#poke markup_t, foreground_color) ptr foreground_color'
-      (#poke markup_t, background_color) ptr background_color'
+      pokeColor ((#ptr markup_t, foreground_color) ptr) foreground_color'
+      pokeColor ((#ptr markup_t, background_color) ptr) background_color'
       (#poke markup_t, outline) ptr outline'
-      (#poke markup_t, outline_color) ptr outline_color'
+      pokeColor ((#ptr markup_t, outline_color) ptr) outline_color'
       (#poke markup_t, underline) ptr underline'
-      (#poke markup_t, underline_color) ptr underline_color'
+      pokeColor ((#ptr markup_t, underline_color) ptr) underline_color'
       (#poke markup_t, overline) ptr overline'
-      (#poke markup_t, overline_color) ptr overline_color'
+      pokeColor ((#ptr markup_t, overline_color) ptr) overline_color'
       (#poke markup_t, strikethrough) ptr strikethrough'
-      (#poke markup_t, strikethrough_color) ptr strikethrough_color'
+      pokeColor ((#ptr markup_t, strikethrough_color) ptr) strikethrough_color'
       (#poke markup_t, font) ptr font'

@@ -15,7 +15,8 @@ Cabal-version:       >=1.8
 Library
   -- Modules exported by the library.
   Exposed-modules: Graphics.Rendering.FreeTypeGL,
-                   Graphics.Rendering.FreeTypeGL.Vec234,
+                   Graphics.Rendering.FreeTypeGL.FontManager,
+                   Graphics.Rendering.FreeTypeGL.TextBuffer,
                    Graphics.Rendering.FreeTypeGL.Markup
 
   -- Packages needed in order to build this package.
