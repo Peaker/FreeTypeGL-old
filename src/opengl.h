@@ -39,18 +39,18 @@
 #    include <OpenGLES/ES2/gl.h>
 #  else
 #    include <OpenGL/gl.h>
-#    include <Glut/glut.h>
+//#    include <Glut/glut.h>
 #  endif
 #elif defined(_WIN32) || defined(_WIN64)
     #include <Windows.h>
     #include <GL/glew.h>
     #include <GL/wglew.h>
-    #include <GLUT/glut.h> // changed according to your path of glut.h
+//    #include <GLUT/glut.h> // changed according to your path of glut.h
 #else
     #define GL_GLEXT_PROTOTYPES
     #include <GL/gl.h>
     #include <GL/glext.h>
-    #include <GL/glut.h>
+//    #include <GL/glut.h>
 #endif
 
 #endif /* OPEN_GL_H */
