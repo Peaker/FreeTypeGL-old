@@ -43,6 +43,7 @@
 #include "markup.h"
 #include "shader.h"
 
+#include <GL/glut.h>
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
@@ -107,7 +108,7 @@ int main( int argc, char **argv )
                                {512,512,0, 0,0,0}, {512,256,0, 0,0,0} };
     GLuint indices[4*3] = { 0,1,2, 0,2,3, 4,5,6, 4,6,7 };
     vertex_buffer_push_back( buffer, vertices, 8, indices, 12 );
-    
+
 
     text_buffer = text_buffer_new( LCD_FILTERING_ON );
     vec4 white = {{1.0, 1.0, 1.0, 1.0}};

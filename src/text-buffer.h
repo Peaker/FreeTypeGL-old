@@ -80,12 +80,12 @@ extern "C" {
  */
 typedef struct {
     /**
-     * Vertex buffer 
+     * Vertex buffer
      */
     vertex_buffer_t *buffer;
 
     /**
-     * Font manager 
+     * Font manager
      */
     font_manager_t *manager;
 
@@ -201,6 +201,20 @@ typedef struct {
  */
   text_buffer_t *
   text_buffer_new( size_t depth );
+
+/**
+ * Creates a new empty text buffer.
+ *
+ * @param manager  Underlying manager
+ * @param shader_vert_filename  Filename for shader vertices (e.g: "shaders/text.vert")
+ * @param shader_frag_filename  Filename for shader frag (e.g: "shaders/text.frag")
+ *
+ * @return  a new empty text buffer.
+ *
+ */
+  text_buffer_t *
+  text_buffer_new_with( font_manager_t *manager,
+                        char *shader_vert_filename, char *shader_frag_filename );
 
 
 /**

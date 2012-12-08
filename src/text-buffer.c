@@ -50,20 +50,32 @@
 
 // ----------------------------------------------------------------------------
 text_buffer_t *
-text_buffer_new( size_t depth )
+text_buffer_new_with(
+    font_manager_t *manager,
+    char *shader_vert_filename, char *shader_frag_filename )
 {
 
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f:2g1f" );
-    self->manager = font_manager_new( 512, 512, depth );
-        self->shader = shader_load("shaders/text.vert",
-                                   "shaders/text.frag");
+    self->manager = manager;
+    self->shader = shader_load(shader_vert_filename, shader_frag_filename);
+    if((GLuint)-1 == self->shader) {
+        free(self);
+        return NULL;
+    }
     self->shader_texture = glGetUniformLocation(self->shader, "texture");
     self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
     self->line_start = 0;
     self->line_ascender = 0;
     self->line_descender = 0;
     return self;
+}
+
+text_buffer_t *
+text_buffer_new( size_t depth )
+{
+    font_manager_t *manager = font_manager_new(512, 512, depth);
+    text_buffer_new_with ( manager, "shaders/text.vert", "shaders/text.frag" );
 }
 
 // ----------------------------------------------------------------------------
@@ -132,12 +144,15 @@ text_buffer_add_text( text_buffer_t * self,
     vertex_buffer_t * buffer = self->buffer;
     font_manager_t * manager = self->manager;
 
-    if( markup == NULL )
-    {
-        return;
+    assert (self);
+    assert (pen);
+    assert (markup);
+    assert (text);
+    if (!markup->font) {
+        int res = font_manager_load_markup_font(manager, markup);
+        assert (0 == res);
+        assert (markup->font);
     }
-
-    assert (markup->font);
 
     if( length == 0 )
     {

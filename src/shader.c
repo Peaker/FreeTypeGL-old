@@ -49,7 +49,7 @@ shader_read( const char *filename )
     if( !file )
     {
         fprintf( stderr, "Unable to open file \"%s\".\n", filename );
-		return 0;
+		return NULL;
     }
 	fseek( file, 0, SEEK_END );
 	size = ftell( file );
@@ -95,6 +95,7 @@ shader_load( const char * vert_filename,
     if( vert_filename && strlen( vert_filename ) )
     {
         char *vert_source = shader_read( vert_filename );
+        if (!vert_source) return (GLuint)-1;
         GLuint vert_shader = shader_compile( vert_source, GL_VERTEX_SHADER);
         glAttachShader( handle, vert_shader);
         free( vert_source );
@@ -102,6 +103,7 @@ shader_load( const char * vert_filename,
     if( frag_filename && strlen( frag_filename ) )
     {
         char *frag_source = shader_read( frag_filename );
+        if (!frag_source) return (GLuint)-1;
         GLuint frag_shader = shader_compile( frag_source, GL_FRAGMENT_SHADER);
         glAttachShader( handle, frag_shader);
         free( frag_source );
