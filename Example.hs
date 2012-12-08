@@ -50,12 +50,9 @@ main = do
 
   font <- FontManager.loadFont manager ttfFilename
   pen <- TextBuffer.newPen
-  withForeignPtr pen $ \penPtr -> do
-    pokeArray penPtr [32, 500]
-    print =<< peekArray 2 penPtr
-  TextBuffer.add textBuffer font pen "Hello world"
   withForeignPtr pen $ \penPtr ->
-    print =<< peekArray 2 penPtr
+    pokeArray penPtr [32, 500]
+  TextBuffer.add textBuffer font pen "Hello world"
   forever $ do
     display textBuffer
     GLFW.pollEvents
