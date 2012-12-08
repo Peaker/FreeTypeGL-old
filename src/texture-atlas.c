@@ -49,12 +49,7 @@ texture_atlas_new( const size_t width,
     assert( (depth == 1) || (depth == 3) || (depth == 4) );
 
     texture_atlas_t *self = (texture_atlas_t *) malloc( sizeof(texture_atlas_t) );
-    if( self == NULL)
-    {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
-    }
+    assert (self);
     self->nodes = vector_new( sizeof(ivec3) );
     self->used = 0;
     self->width = width;
@@ -70,12 +65,7 @@ texture_atlas_new( const size_t width,
     self->data = (unsigned char *)
         calloc( width*height*depth, sizeof(unsigned char) );
 
-    if( self->data == NULL)
-    {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
-    }
+    assert(self->data);
 
     return self;
 }
@@ -122,7 +112,7 @@ texture_atlas_set_region( texture_atlas_t * self,
     size_t charsize = sizeof(char);
     for( i=0; i<height; ++i )
     {
-        memcpy( self->data+((y+i)*self->width + x ) * charsize * depth, 
+        memcpy( self->data+((y+i)*self->width + x ) * charsize * depth,
                 data + (i*stride) * charsize, width * charsize * depth  );
     }
 }
@@ -220,7 +210,7 @@ texture_atlas_get_region( texture_atlas_t * self,
 			}
         }
     }
-   
+
 	if( best_index == -1 )
     {
         region.x = -1;
@@ -231,12 +221,7 @@ texture_atlas_get_region( texture_atlas_t * self,
     }
 
     node = (ivec3 *) malloc( sizeof(ivec3) );
-    if( node == NULL)
-    {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
-    }
+    assert (node);
     node->x = region.x;
     node->y = region.y + height;
     node->z = width;
@@ -329,4 +314,3 @@ texture_atlas_upload( texture_atlas_t * self )
                       0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
     }
 }
-

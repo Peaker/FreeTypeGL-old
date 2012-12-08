@@ -4,16 +4,21 @@ module Graphics.Rendering.FreeTypeGL
   , textBufferRender
   , penNew
   , mkColor, Color
-  , textBufferAddWChar
+  , textBufferAdd
   ) where
 
-import Foreign (Ptr, pokeArray, nullPtr, mallocArray)
+import Foreign (Ptr, nullPtr)
+import Foreign.C.String (CWString, withCWString, newCString)
+import Foreign.C.Types (CSize(..), CInt(..))
 import Foreign.ForeignPtr (ForeignPtr, mallocForeignPtrArray, withForeignPtr)
-import Foreign.C.Types (CSize(..), CWchar(..))
-import Foreign.C.String (newCString)
 import Foreign.Marshal.Alloc (malloc)
+import Foreign.Marshal.Array (mallocArray, pokeArray)
+import Foreign.Marshal.Error (throwIfNull, throwIf_)
 import Foreign.Storable (Storable(..))
 import Graphics.Rendering.FreeTypeGL.Markup (Markup, Markup_S(..))
+
+data FontManager_S
+type FontManager = Ptr FontManager_S
 
 data TextBuffer_S
 type TextBuffer = Ptr TextBuffer_S
@@ -35,20 +40,18 @@ foreign import ccall "text_buffer_new"
 foreign import ccall "text_buffer_render"
   c_text_buffer_render :: TextBuffer -> IO ()
 
--- foreign import ccall "text_buffer_add_text"
---   c_text_buffer_add_text :: TextBuffer -> Pen -> Markup -> Ptr CWchar -> IO ()
+foreign import ccall "text_buffer_add_text"
+  c_text_buffer_add_text :: TextBuffer -> Ptr Float -> Markup -> CWString -> IO ()
 
-foreign import ccall "text_buffer_add_wchar"
-  c_text_buffer_add_wchar :: TextBuffer -> Ptr Float -> Markup -> CWchar -> CWchar -> IO ()
+foreign import ccall "font_manager_load_markup_font"
+  c_font_manager_load_markup_font :: FontManager -> Markup -> IO CInt
 
 textBufferNew :: IO TextBuffer
-textBufferNew = c_text_buffer_new 4 -- depth=4, RGBA
+textBufferNew =
+  throwIfNull "Failed to make a text buffer" $ c_text_buffer_new 4 -- depth=4, RGBA
 
 textBufferRender :: TextBuffer -> IO ()
 textBufferRender = c_text_buffer_render
-
-fromChar :: Char -> CWchar
-fromChar = toEnum . fromEnum
 
 mkColor :: Float -> Float -> Float -> Float -> IO Color
 mkColor r g b a = do
@@ -85,8 +88,18 @@ mkMarkup ttf = do
     }
   return markup
 
-textBufferAddWChar :: TextBuffer -> Pen -> Char -> Char -> IO ()
-textBufferAddWChar textBuffer pen prev new = do
+loadMarkupFont :: FontManager -> Markup -> IO ()
+loadMarkupFont manager markup =
+  throwIf_ (/= 0) (("Load font error: "++) . show) $
+  c_font_manager_load_markup_font manager markup
+
+#include "text-buffer.h"
+
+textBufferAdd :: TextBuffer -> Pen -> String -> IO ()
+textBufferAdd textBuffer pen str = do
   markup <- mkMarkup "ttf"
-  withForeignPtr pen $ \penPtr ->
-    c_text_buffer_add_wchar textBuffer penPtr markup (fromChar prev) (fromChar new)
+  manager <- (#peek text_buffer_t, manager) textBuffer
+  loadMarkupFont manager markup
+  withCWString str $ \strPtr ->
+    withForeignPtr pen $ \penPtr ->
+      c_text_buffer_add_text textBuffer penPtr markup strPtr

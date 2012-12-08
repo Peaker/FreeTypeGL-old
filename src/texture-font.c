@@ -128,12 +128,7 @@ texture_glyph_t *
 texture_glyph_new( void )
 {
     texture_glyph_t *self = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
-    if( self == NULL)
-    {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
-    }
+    assert (self);
     self->id        = 0;
     self->width     = 0;
     self->height    = 0;
@@ -162,7 +157,7 @@ texture_glyph_delete( texture_glyph_t *self )
 }
 
 // ---------------------------------------------- texture_glyph_get_kerning ---
-float 
+float
 texture_glyph_get_kerning( const texture_glyph_t * self,
                            const wchar_t charcode )
 {
@@ -240,12 +235,7 @@ texture_font_new( texture_atlas_t * atlas,
     assert( size );
 
     texture_font_t *self = (texture_font_t *) malloc( sizeof(texture_font_t) );
-    if( self == NULL)
-    {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
-    }
+    assert (self);
     self->glyphs = vector_new( sizeof(texture_glyph_t *) );
     self->atlas = atlas;
     self->height = 0;
@@ -289,7 +279,7 @@ texture_font_new( texture_atlas_t * atlas,
         self->underline_thickness = 1.0;
     }
 
-    FT_Size_Metrics metrics = face->size->metrics; 
+    FT_Size_Metrics metrics = face->size->metrics;
     self->ascender = (metrics.ascender >> 6) / 100.0;
     self->descender = (metrics.descender >> 6) / 100.0;
     self->height = (metrics.height >> 6) / 100.0;
@@ -459,7 +449,7 @@ texture_font_load_glyphs( texture_font_t * self,
                         FT_Errors[error].code, FT_Errors[error].message);
                 return 0;
             }
-          
+
             if( depth == 1)
             {
                 error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
@@ -564,7 +554,7 @@ texture_font_get_glyph( texture_font_t * self,
         glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
         // If charcode is -1, we don't care about outline type or thickness
         if( (glyph->charcode == charcode) &&
-            ((charcode == (wchar_t)(-1) ) || 
+            ((charcode == (wchar_t)(-1) ) ||
              ((glyph->outline_type == self->outline_type) &&
               (glyph->outline_thickness == self->outline_thickness)) ))
         {
@@ -608,5 +598,3 @@ texture_font_get_glyph( texture_font_t * self,
     }
     return NULL;
 }
-
-

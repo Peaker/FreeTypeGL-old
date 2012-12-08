@@ -27,7 +27,7 @@ Library
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   Build-tools: hsc2hs
   ghc-options: -Wall
-  include-dirs: src objs include include/freetype/config
+  include-dirs: src include include/freetype/config
                 include/freetype
                 freetype2/base
                 freetype2/truetype
@@ -99,7 +99,16 @@ Library
              freetype2/lzw/ftlzw.c
              freetype2/psaux/psaux.c
              freetype2/psnames/psmodule.c
-             src/edtaa3func.c  src/font-manager.c  src/platform.c  src/shader.c  src/text-buffer.c  src/texture-atlas.c  src/texture-font.c  src/vector.c  src/vertex-attribute.c  src/vertex-buffer.c
+             src/edtaa3func.c
+             src/font-manager.c
+             src/platform.c
+             src/shader.c
+             src/text-buffer.c
+             src/texture-atlas.c
+             src/texture-font.c
+             src/vector.c
+             src/vertex-attribute.c
+             src/vertex-buffer.c
 
 -- source-repository head
 --   type: git

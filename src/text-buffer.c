@@ -136,15 +136,7 @@ text_buffer_add_text( text_buffer_t * self,
         return;
     }
 
-    if( !markup->font )
-    {
-        markup->font = font_manager_get_from_markup( manager, markup );
-        if( ! markup->font )
-        {
-            fprintf( stderr, "Houston, we've got a problem !\n" );
-            exit( EXIT_FAILURE );
-        }
-    }
+    assert (markup->font);
 
     if( length == 0 )
     {
@@ -218,22 +210,22 @@ text_buffer_add_wchar( text_buffer_t * self,
         self->line_start = vector_size( self->buffer->items );
         return;
     }
-        
+
     texture_glyph_t *glyph = texture_font_get_glyph( font, current );
     texture_glyph_t *black = texture_font_get_glyph( font, -1 );
-        
+
     if( glyph == NULL )
     {
         return;
     }
-    
+
     float kerning = 0;
     if( i > 0)
     {
         kerning = texture_glyph_get_kerning( glyph, previous );
     }
     pen->x += kerning;
-        
+
     // Background
     if( markup->background_color.alpha > 0 )
     {

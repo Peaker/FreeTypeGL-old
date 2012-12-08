@@ -45,12 +45,7 @@ vector_new( size_t item_size )
     assert( item_size );
 
     vector_t *self = (vector_t *) malloc( sizeof(vector_t) );
-    if( !self )
-    {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
-    }
+    assert (self);
     self->item_size = item_size;
     self->size      = 0;
     self->capacity  = 1;

@@ -76,12 +76,7 @@ font_manager_new( size_t width, size_t height, size_t depth )
     font_manager_t *self;
     texture_atlas_t *atlas = texture_atlas_new( width, height, depth );
     self = (font_manager_t *) malloc( sizeof(font_manager_t) );
-    if( !self )
-    {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
-    }
+    assert(self);
     self->atlas = atlas;
     self->fonts = vector_new( sizeof(texture_font_t *) );
     self->cache = wcsdup( L" " );
@@ -121,7 +116,7 @@ font_manager_delete_font( font_manager_t * self,
     size_t i;
     assert( self );
     assert( font );
-    
+
     texture_font_t *other;
     for( i=0; i<self->fonts->size;++i )
     {
@@ -216,6 +211,14 @@ font_manager_get_from_markup( font_manager_t *self,
 
     return font_manager_get_from_description( self, markup->family, markup->size,
                                               markup->bold,   markup->italic );
+}
+
+int
+font_manager_load_markup_font(font_manager_t * manager, markup_t * markup)
+{
+    if(markup->font) return 0;
+    markup->font = font_manager_get_from_markup( manager, markup );
+    return markup->font ? 0 : -1;
 }
 
 // ----------------------------------------- font_manager_match_description ---
