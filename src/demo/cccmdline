@@ -1,0 +1,70 @@
+              ../*.c -I ../ -lGL -lGLU -lglut
+              -I ../../objs
+              -I ../../include
+              -I ../../include/freetype/config
+              -I ../../include/freetype
+              -I ../../freetype2/base
+              -I ../../freetype2/truetype
+              -I ../../freetype2/type1
+              -I ../../freetype2/cff
+              -I ../../freetype2/cid
+              -I ../../freetype2/pfr
+              -I ../../freetype2/type42
+              -I ../../freetype2/winfonts
+              -I ../../freetype2/pcf
+              -I ../../freetype2/bdf
+              -I ../../freetype2/sfnt
+              -I ../../freetype2/autofit
+              -I ../../freetype2/pshinter
+              -I ../../freetype2/raster
+              -I ../../freetype2/smooth
+              -I ../../freetype2/cache
+              -I ../../freetype2/gzip
+              -I ../../freetype2/lzw
+              -I ../../freetype2/psaux
+              -I ../../freetype2/psnames
+              -DFT_CONFIG_CONFIG_H=<ftconfig.h>
+              -DFT2_BUILD_LIBRARY
+              -DFT_CONFIG_MODULES_H=<ftmodule.h>
+              -DDARWIN_NO_CARBON
+             ../../freetype2/base/ftsystem.c
+             ../../freetype2/base/ftdebug.c
+             ../../freetype2/base/ftinit.c
+             ../../freetype2/base/ftbase.c
+             ../../freetype2/base/ftbbox.c
+             ../../freetype2/base/ftbdf.c
+             ../../freetype2/base/ftbitmap.c
+             ../../freetype2/base/ftcid.c
+             ../../freetype2/base/ftfstype.c
+             ../../freetype2/base/ftgasp.c
+             ../../freetype2/base/ftglyph.c
+             ../../freetype2/base/ftgxval.c
+             ../../freetype2/base/ftlcdfil.c
+             ../../freetype2/base/ftmm.c
+             ../../freetype2/base/ftotval.c
+             ../../freetype2/base/ftpatent.c
+             ../../freetype2/base/ftpfr.c
+             ../../freetype2/base/ftstroke.c
+             ../../freetype2/base/ftsynth.c
+             ../../freetype2/base/fttype1.c
+             ../../freetype2/base/ftwinfnt.c
+             ../../freetype2/base/ftxf86.c
+             ../../freetype2/truetype/truetype.c
+             ../../freetype2/type1/type1.c
+             ../../freetype2/cff/cff.c
+             ../../freetype2/cid/type1cid.c
+             ../../freetype2/pfr/pfr.c
+             ../../freetype2/type42/type42.c
+             ../../freetype2/winfonts/winfnt.c
+             ../../freetype2/pcf/pcf.c
+             ../../freetype2/bdf/bdf.c
+             ../../freetype2/sfnt/sfnt.c
+             ../../freetype2/autofit/autofit.c
+             ../../freetype2/pshinter/pshinter.c
+             ../../freetype2/raster/raster.c
+             ../../freetype2/smooth/smooth.c
+             ../../freetype2/cache/ftcache.c
+             ../../freetype2/gzip/ftgzip.c
+             ../../freetype2/lzw/ftlzw.c
+             ../../freetype2/psaux/psaux.c
+             ../../freetype2/psnames/psmodule.c
