@@ -195,6 +195,9 @@ typedef struct {
                                   const int bold,
                                   const int italic );
 
+  int
+  font_manager_load_markup_font(font_manager_t *, markup_t *);
+
 /** @} */
 
 #ifdef __cplusplus
@@ -202,4 +205,3 @@ typedef struct {
 #endif // ifdef __cplusplus
 
 #endif /* __FONT_MANAGER_H__ */
-
