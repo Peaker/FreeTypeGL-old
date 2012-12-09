@@ -1,4 +1,4 @@
-Name:                freetype-gl
+Name:                FreeTypeGL
 Version:             0.0.1
 Synopsis:            Haskell binding for FreeType-GL library
 Description:         Wrapper around FreeType-GL library.

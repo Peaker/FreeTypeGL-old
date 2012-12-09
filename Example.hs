@@ -43,13 +43,12 @@ main :: IO ()
 main = do
   [ttfFilename] <- getArgs
   initScreen
-  reshape
-  GLFW.setWindowCloseCallback $ error "Quit"
   manager <- FontManager.new (512, 512) 3 -- depth
   textBuffer <- TextBuffer.new manager "src/shaders/text.vert" "src/shaders/text.frag"
-
   font <- FontManager.loadFont manager ttfFilename
   pen <- TextBuffer.newPen
+  reshape
+  GLFW.setWindowCloseCallback $ error "Quit"
   withForeignPtr pen $ \penPtr ->
     pokeArray penPtr [32, 500]
   TextBuffer.add textBuffer font pen "Hello world"
