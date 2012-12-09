@@ -186,32 +186,31 @@ texture_atlas_get_region( texture_atlas_t * self,
     assert( self );
 
 	int y, best_height, best_width, best_index;
-    ivec3 *node, *prev;
     ivec4 region = {{0,0,width,height}};
     size_t i;
 
     best_height = INT_MAX;
     best_index  = -1;
     best_width = INT_MAX;
-	for( i=0; i<self->nodes->size; ++i )
-	{
+    for( i=0; i<self->nodes->size; ++i )
+    {
         y = texture_atlas_fit( self, i, width, height );
-		if( y >= 0 )
-		{
-            node = (ivec3 *) vector_get( self->nodes, i );
-			if( ( (y + height) < best_height ) ||
+        if( y >= 0 )
+        {
+            ivec3 *node = (ivec3 *) vector_get( self->nodes, i );
+            if( ( (y + height) < best_height ) ||
                 ( ((y + height) == best_height) && (node->z < best_width)) )
-			{
-				best_height = y + height;
-				best_index = i;
-				best_width = node->z;
-				region.x = node->x;
-				region.y = y;
-			}
+            {
+                best_height = y + height;
+                best_index = i;
+                best_width = node->z;
+                region.x = node->x;
+                region.y = y;
+            }
         }
     }
 
-	if( best_index == -1 )
+    if( best_index == -1 )
     {
         region.x = -1;
         region.y = -1;
@@ -220,18 +219,18 @@ texture_atlas_get_region( texture_atlas_t * self,
         return region;
     }
 
-    node = (ivec3 *) malloc( sizeof(ivec3) );
-    assert (node);
-    node->x = region.x;
-    node->y = region.y + height;
-    node->z = width;
-    vector_insert( self->nodes, best_index, node );
-    free( node );
+    {
+        ivec3 node =
+            { .x = region.x
+            , .y = region.y + height
+            , .z = width };
+        vector_insert( self->nodes, best_index, &node );
+    }
 
     for(i = best_index+1; i < self->nodes->size; ++i)
     {
-        node = (ivec3 *) vector_get( self->nodes, i );
-        prev = (ivec3 *) vector_get( self->nodes, i-1 );
+        ivec3 *node = (ivec3 *) vector_get( self->nodes, i );
+        ivec3 *prev = (ivec3 *) vector_get( self->nodes, i-1 );
 
         if (node->x < (prev->x + prev->z) )
         {
