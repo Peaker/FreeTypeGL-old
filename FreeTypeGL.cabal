@@ -65,3 +65,7 @@ Executable freetype-gl-example
   else
     Buildable: False
   Main-is:       Example.hs
+
+source-repository head
+  type: git
+  location: git://github.com/Peaker/GL.git
