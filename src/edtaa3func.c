@@ -54,7 +54,7 @@
  *
  * Updated in 2011 to avoid a corner case infinite loop.
  *
-*/
+ */
 #include <math.h>
 
 
@@ -85,7 +85,7 @@ void computegradient(double *img, int w, int h, double *gx, double *gy)
     }
     // TODO: Compute reasonable values for gx, gy also around the image edges.
     // (These are zero now, which reduces the accuracy for a 1-pixel wide region
-	// around the image edge.) 2x2 kernels would be suitable for this.
+    // around the image edge.) 2x2 kernels would be suitable for this.
 }
 
 /*
@@ -128,35 +128,35 @@ double edgedf(double gx, double gy, double a)
         } else { // 1-a1 < a <= 1
             df = -0.5*(gx + gy) + sqrt(2.0*gx*gy*(1.0-a));
         }
-    }    
+    }
     return df;
 }
 
 double distaa3(double *img, double *gximg, double *gyimg, int w, int c, int xc, int yc, int xi, int yi)
 {
-  double di, df, dx, dy, gx, gy, a;
-  int closest;
-  
-  closest = c-xc-yc*w; // Index to the edge pixel pointed to from c
-  a = img[closest];    // Grayscale value at the edge pixel
-  gx = gximg[closest]; // X gradient component at the edge pixel
-  gy = gyimg[closest]; // Y gradient component at the edge pixel
-  
-  if(a > 1.0) a = 1.0;
-  if(a < 0.0) a = 0.0; // Clip grayscale values outside the range [0,1]
-  if(a == 0.0) return 1000000.0; // Not an object pixel, return "very far" ("don't know yet")
+    double di, df, dx, dy, gx, gy, a;
+    int closest;
 
-  dx = (double)xi;
-  dy = (double)yi;
-  di = sqrt(dx*dx + dy*dy); // Length of integer vector, like a traditional EDT
-  if(di==0) { // Use local gradient only at edges
-      // Estimate based on local gradient only
-      df = edgedf(gx, gy, a);
-  } else {
-      // Estimate gradient based on direction to edge (accurate for large di)
-      df = edgedf(dx, dy, a);
-  }
-  return di + df; // Same metric as edtaa2, except at edges (where di=0)
+    closest = c-xc-yc*w; // Index to the edge pixel pointed to from c
+    a = img[closest];    // Grayscale value at the edge pixel
+    gx = gximg[closest]; // X gradient component at the edge pixel
+    gy = gyimg[closest]; // Y gradient component at the edge pixel
+
+    if(a > 1.0) a = 1.0;
+    if(a < 0.0) a = 0.0; // Clip grayscale values outside the range [0,1]
+    if(a == 0.0) return 1000000.0; // Not an object pixel, return "very far" ("don't know yet")
+
+    dx = (double)xi;
+    dy = (double)yi;
+    di = sqrt(dx*dx + dy*dy); // Length of integer vector, like a traditional EDT
+    if(di==0) { // Use local gradient only at edges
+        // Estimate based on local gradient only
+        df = edgedf(gx, gy, a);
+    } else {
+        // Estimate gradient based on direction to edge (accurate for large di)
+        df = edgedf(dx, dy, a);
+    }
+    return di + df; // Same metric as edtaa2, except at edges (where di=0)
 }
 
 // Shorthand macro: add ubiquitous parameters dist, gx, gy, img and w and call distaa3()
@@ -164,414 +164,414 @@ double distaa3(double *img, double *gximg, double *gyimg, int w, int c, int xc, 
 
 void edtaa3(double *img, double *gx, double *gy, int w, int h, short *distx, short *disty, double *dist)
 {
-  int x, y, i, c;
-  int offset_u, offset_ur, offset_r, offset_rd,
-  offset_d, offset_dl, offset_l, offset_lu;
-  double olddist, newdist;
-  int cdistx, cdisty, newdistx, newdisty;
-  int changed;
-  double epsilon = 1e-3;
+    int x, y, i, c;
+    int offset_u, offset_ur, offset_r, offset_rd,
+        offset_d, offset_dl, offset_l, offset_lu;
+    double olddist, newdist;
+    int cdistx, cdisty, newdistx, newdisty;
+    int changed;
+    double epsilon = 1e-3;
 
-  /* Initialize index offsets for the current image width */
-  offset_u = -w;
-  offset_ur = -w+1;
-  offset_r = 1;
-  offset_rd = w+1;
-  offset_d = w;
-  offset_dl = w-1;
-  offset_l = -1;
-  offset_lu = -w-1;
+    /* Initialize index offsets for the current image width */
+    offset_u = -w;
+    offset_ur = -w+1;
+    offset_r = 1;
+    offset_rd = w+1;
+    offset_d = w;
+    offset_dl = w-1;
+    offset_l = -1;
+    offset_lu = -w-1;
 
-  /* Initialize the distance images */
-  for(i=0; i<w*h; i++) {
-    distx[i] = 0; // At first, all pixels point to
-    disty[i] = 0; // themselves as the closest known.
-    if(img[i] <= 0.0)
-      {
-	dist[i]= 1000000.0; // Big value, means "not set yet"
-      }
-    else if (img[i]<1.0) {
-      dist[i] = edgedf(gx[i], gy[i], img[i]); // Gradient-assisted estimate
+    /* Initialize the distance images */
+    for(i=0; i<w*h; i++) {
+        distx[i] = 0; // At first, all pixels point to
+        disty[i] = 0; // themselves as the closest known.
+        if(img[i] <= 0.0)
+        {
+            dist[i]= 1000000.0; // Big value, means "not set yet"
+        }
+        else if (img[i]<1.0) {
+            dist[i] = edgedf(gx[i], gy[i], img[i]); // Gradient-assisted estimate
+        }
+        else {
+            dist[i]= 0.0; // Inside the object
+        }
     }
-    else {
-      dist[i]= 0.0; // Inside the object
-    }
-  }
 
-  /* Perform the transformation */
-  do
+    /* Perform the transformation */
+    do
     {
-      changed = 0;
+        changed = 0;
 
-      /* Scan rows, except first row */
-      for(y=1; y<h; y++)
+        /* Scan rows, except first row */
+        for(y=1; y<h; y++)
         {
 
-          /* move index to leftmost pixel of current row */
-          i = y*w;
+            /* move index to leftmost pixel of current row */
+            i = y*w;
 
-          /* scan right, propagate distances from above & left */
+            /* scan right, propagate distances from above & left */
 
-          /* Leftmost pixel is special, has no left neighbors */
-          olddist = dist[i];
-          if(olddist > 0) // If non-zero distance or not set yet
+            /* Leftmost pixel is special, has no left neighbors */
+            olddist = dist[i];
+            if(olddist > 0) // If non-zero distance or not set yet
             {
-	      c = i + offset_u; // Index of candidate for testing
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx;
-              newdisty = cdisty+1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i + offset_u; // Index of candidate for testing
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx;
+                newdisty = cdisty+1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_ur;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx-1;
-              newdisty = cdisty+1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_ur;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx-1;
+                newdisty = cdisty+1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    changed = 1;
                 }
             }
-          i++;
+            i++;
 
-          /* Middle pixels have all neighbors */
-          for(x=1; x<w-1; x++, i++)
+            /* Middle pixels have all neighbors */
+            for(x=1; x<w-1; x++, i++)
             {
-              olddist = dist[i];
-              if(olddist <= 0) continue; // No need to update further
+                olddist = dist[i];
+                if(olddist <= 0) continue; // No need to update further
 
-	      c = i+offset_l;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx+1;
-              newdisty = cdisty;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_l;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx+1;
+                newdisty = cdisty;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_lu;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx+1;
-              newdisty = cdisty+1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_lu;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx+1;
+                newdisty = cdisty+1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_u;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx;
-              newdisty = cdisty+1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_u;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx;
+                newdisty = cdisty+1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_ur;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx-1;
-              newdisty = cdisty+1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_ur;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx-1;
+                newdisty = cdisty+1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  changed = 1;
-                }
-            }
-
-          /* Rightmost pixel of row is special, has no right neighbors */
-          olddist = dist[i];
-          if(olddist > 0) // If not already zero distance
-            {
-	      c = i+offset_l;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx+1;
-              newdisty = cdisty;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
-                {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
-                }
-
-	      c = i+offset_lu;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx+1;
-              newdisty = cdisty+1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
-                {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
-                }
-
-	      c = i+offset_u;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx;
-              newdisty = cdisty+1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
-                {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    changed = 1;
                 }
             }
 
-          /* Move index to second rightmost pixel of current row. */
-          /* Rightmost pixel is skipped, it has no right neighbor. */
-          i = y*w + w-2;
-
-          /* scan left, propagate distance from right */
-          for(x=w-2; x>=0; x--, i--)
+            /* Rightmost pixel of row is special, has no right neighbors */
+            olddist = dist[i];
+            if(olddist > 0) // If not already zero distance
             {
-              olddist = dist[i];
-              if(olddist <= 0) continue; // Already zero distance
-
-	      c = i+offset_r;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx-1;
-              newdisty = cdisty;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_l;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx+1;
+                newdisty = cdisty;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
+                }
+
+                c = i+offset_lu;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx+1;
+                newdisty = cdisty+1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
+                {
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
+                }
+
+                c = i+offset_u;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx;
+                newdisty = cdisty+1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
+                {
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    changed = 1;
+                }
+            }
+
+            /* Move index to second rightmost pixel of current row. */
+            /* Rightmost pixel is skipped, it has no right neighbor. */
+            i = y*w + w-2;
+
+            /* scan left, propagate distance from right */
+            for(x=w-2; x>=0; x--, i--)
+            {
+                olddist = dist[i];
+                if(olddist <= 0) continue; // Already zero distance
+
+                c = i+offset_r;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx-1;
+                newdisty = cdisty;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
+                {
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    changed = 1;
                 }
             }
         }
-      
-      /* Scan rows in reverse order, except last row */
-      for(y=h-2; y>=0; y--)
+
+        /* Scan rows in reverse order, except last row */
+        for(y=h-2; y>=0; y--)
         {
-          /* move index to rightmost pixel of current row */
-          i = y*w + w-1;
+            /* move index to rightmost pixel of current row */
+            i = y*w + w-1;
 
-          /* Scan left, propagate distances from below & right */
+            /* Scan left, propagate distances from below & right */
 
-          /* Rightmost pixel is special, has no right neighbors */
-          olddist = dist[i];
-          if(olddist > 0) // If not already zero distance
+            /* Rightmost pixel is special, has no right neighbors */
+            olddist = dist[i];
+            if(olddist > 0) // If not already zero distance
             {
-	      c = i+offset_d;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx;
-              newdisty = cdisty-1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_d;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx;
+                newdisty = cdisty-1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_dl;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx+1;
-              newdisty = cdisty-1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_dl;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx+1;
+                newdisty = cdisty-1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    changed = 1;
                 }
             }
-          i--;
+            i--;
 
-          /* Middle pixels have all neighbors */
-          for(x=w-2; x>0; x--, i--)
+            /* Middle pixels have all neighbors */
+            for(x=w-2; x>0; x--, i--)
             {
-              olddist = dist[i];
-              if(olddist <= 0) continue; // Already zero distance
+                olddist = dist[i];
+                if(olddist <= 0) continue; // Already zero distance
 
-	      c = i+offset_r;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx-1;
-              newdisty = cdisty;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_r;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx-1;
+                newdisty = cdisty;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_rd;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx-1;
-              newdisty = cdisty-1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_rd;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx-1;
+                newdisty = cdisty-1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_d;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx;
-              newdisty = cdisty-1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_d;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx;
+                newdisty = cdisty-1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-                  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_dl;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx+1;
-              newdisty = cdisty-1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_dl;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx+1;
+                newdisty = cdisty-1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-                  dist[i]=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    changed = 1;
                 }
             }
-          /* Leftmost pixel is special, has no left neighbors */
-          olddist = dist[i];
-          if(olddist > 0) // If not already zero distance
+            /* Leftmost pixel is special, has no left neighbors */
+            olddist = dist[i];
+            if(olddist > 0) // If not already zero distance
             {
-	      c = i+offset_r;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx-1;
-              newdisty = cdisty;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_r;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx-1;
+                newdisty = cdisty;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-                  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_rd;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx-1;
-              newdisty = cdisty-1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_rd;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx-1;
+                newdisty = cdisty-1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-		  dist[i]=newdist;
-                  olddist=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    olddist=newdist;
+                    changed = 1;
                 }
 
-	      c = i+offset_d;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx;
-              newdisty = cdisty-1;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_d;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx;
+                newdisty = cdisty-1;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-                  dist[i]=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    changed = 1;
                 }
             }
 
-          /* Move index to second leftmost pixel of current row. */
-          /* Leftmost pixel is skipped, it has no left neighbor. */
-          i = y*w + 1;
-          for(x=1; x<w; x++, i++)
+            /* Move index to second leftmost pixel of current row. */
+            /* Leftmost pixel is skipped, it has no left neighbor. */
+            i = y*w + 1;
+            for(x=1; x<w; x++, i++)
             {
-              /* scan right, propagate distance from left */
-              olddist = dist[i];
-              if(olddist <= 0) continue; // Already zero distance
+                /* scan right, propagate distance from left */
+                olddist = dist[i];
+                if(olddist <= 0) continue; // Already zero distance
 
-	      c = i+offset_l;
-	      cdistx = distx[c];
-	      cdisty = disty[c];
-              newdistx = cdistx+1;
-              newdisty = cdisty;
-              newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
-              if(newdist < olddist-epsilon)
+                c = i+offset_l;
+                cdistx = distx[c];
+                cdisty = disty[c];
+                newdistx = cdistx+1;
+                newdisty = cdisty;
+                newdist = DISTAA(c, cdistx, cdisty, newdistx, newdisty);
+                if(newdist < olddist-epsilon)
                 {
-                  distx[i]=newdistx;
-                  disty[i]=newdisty;
-                  dist[i]=newdist;
-                  changed = 1;
+                    distx[i]=newdistx;
+                    disty[i]=newdisty;
+                    dist[i]=newdist;
+                    changed = 1;
                 }
             }
         }
     }
-  while(changed); // Sweep until no more updates are made
+    while(changed); // Sweep until no more updates are made
 
-  /* The transformation is completed. */
+    /* The transformation is completed. */
 
 }

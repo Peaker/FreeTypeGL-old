@@ -129,28 +129,28 @@ texture_atlas_fit( texture_atlas_t * self,
 
     ivec3 *node = (ivec3 *) (vector_get( self->nodes, index ));
     int x = node->x, y, width_left = width;
-	size_t i = index;
+    size_t i = index;
 
-	if ( (x + width) > (self->width-1) )
+    if ( (x + width) > (self->width-1) )
     {
-		return -1;
+        return -1;
     }
-	y = node->y;
-	while( width_left > 0 )
-	{
+    y = node->y;
+    while( width_left > 0 )
+    {
         node = (ivec3 *) (vector_get( self->nodes, i ));
         if( node->y > y )
         {
             y = node->y;
         }
-		if( (y + height) > (self->height-1) )
+        if( (y + height) > (self->height-1) )
         {
-			return -1;
+            return -1;
         }
-		width_left -= node->z;
-		++i;
-	}
-	return y;
+        width_left -= node->z;
+        ++i;
+    }
+    return y;
 }
 
 
@@ -163,16 +163,16 @@ texture_atlas_merge( texture_atlas_t * self )
     ivec3 *node, *next;
     size_t i;
 
-	for( i=0; i< self->nodes->size-1; ++i )
+    for( i=0; i< self->nodes->size-1; ++i )
     {
         node = (ivec3 *) (vector_get( self->nodes, i ));
         next = (ivec3 *) (vector_get( self->nodes, i+1 ));
-		if( node->y == next->y )
-		{
-			node->z += next->z;
+        if( node->y == next->y )
+        {
+            node->z += next->z;
             vector_erase( self->nodes, i+1 );
-			--i;
-		}
+            --i;
+        }
     }
 }
 
@@ -185,7 +185,7 @@ texture_atlas_get_region( texture_atlas_t * self,
 {
     assert( self );
 
-	int y, best_height, best_width, best_index;
+    int y, best_height, best_width, best_index;
     ivec4 region = {{0,0,width,height}};
     size_t i;
 

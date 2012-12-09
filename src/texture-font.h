@@ -76,7 +76,7 @@ typedef struct
      * Left character code in the kern pair.
      */
     wchar_t charcode;
-    
+
     /**
      * Kerning value (in fractional pixels).
      */
@@ -94,26 +94,26 @@ typedef struct
  *                       xmin                     xmax
  *                        |                         |
  *                        |<-------- width -------->|
- *                        |                         |    
+ *                        |                         |
  *              |         +-------------------------+----------------- ymax
  *              |         |    ggggggggg   ggggg    |     ^        ^
- *              |         |   g:::::::::ggg::::g    |     |        | 
- *              |         |  g:::::::::::::::::g    |     |        | 
- *              |         | g::::::ggggg::::::gg    |     |        | 
- *              |         | g:::::g     g:::::g     |     |        | 
- *    offset_x -|-------->| g:::::g     g:::::g     |  offset_y    | 
- *              |         | g:::::g     g:::::g     |     |        | 
- *              |         | g::::::g    g:::::g     |     |        | 
- *              |         | g:::::::ggggg:::::g     |     |        |  
+ *              |         |   g:::::::::ggg::::g    |     |        |
+ *              |         |  g:::::::::::::::::g    |     |        |
+ *              |         | g::::::ggggg::::::gg    |     |        |
+ *              |         | g:::::g     g:::::g     |     |        |
+ *    offset_x -|-------->| g:::::g     g:::::g     |  offset_y    |
+ *              |         | g:::::g     g:::::g     |     |        |
+ *              |         | g::::::g    g:::::g     |     |        |
+ *              |         | g:::::::ggggg:::::g     |     |        |
  *              |         |  g::::::::::::::::g     |     |      height
- *              |         |   gg::::::::::::::g     |     |        | 
+ *              |         |   gg::::::::::::::g     |     |        |
  *  baseline ---*---------|---- gggggggg::::::g-----*--------      |
- *            / |         |             g:::::g     |              | 
- *     origin   |         | gggggg      g:::::g     |              | 
- *              |         | g:::::gg   gg:::::g     |              | 
- *              |         |  g::::::ggg:::::::g     |              | 
- *              |         |   gg:::::::::::::g      |              | 
- *              |         |     ggg::::::ggg        |              | 
+ *            / |         |             g:::::g     |              |
+ *     origin   |         | gggggg      g:::::g     |              |
+ *              |         | g:::::gg   gg:::::g     |              |
+ *              |         |  g::::::ggg:::::::g     |              |
+ *              |         |   gg:::::::::::::g      |              |
+ *              |         |     ggg::::::ggg        |              |
  *              |         |         gggggg          |              v
  *              |         +-------------------------+----------------- ymin
  *              |                                   |
@@ -225,7 +225,7 @@ typedef struct
      * Atlas structure to store glyphs data.
      */
     texture_atlas_t * atlas;
-    
+
     /**
      * Font filename
      */
@@ -235,7 +235,7 @@ typedef struct
      * Font size
      */
     float size;
-    
+
     /**
      * Whether to use autohint when rendering font
      */
@@ -251,7 +251,7 @@ typedef struct
      */
     float outline_thickness;
 
-    /** 
+    /**
      * Whether to use our own lcd filter.
      */
     int filtering;
@@ -346,7 +346,7 @@ typedef struct
 
 /**
  * Request a new glyph from the font. If it has not been created yet, it will
- * be. 
+ * be.
  *
  * @param self     A valid texture font
  * @param charcode Character codepoint to be loaded.
@@ -378,10 +378,10 @@ typedef struct
  *
  * @param self      a valid texture glyph
  * @param charcode  codepoint of the peceding glyph
- * 
+ *
  * @return x kerning value
  */
-float 
+float
 texture_glyph_get_kerning( const texture_glyph_t * self,
                            const wchar_t charcode );
 
@@ -392,4 +392,3 @@ texture_glyph_get_kerning( const texture_glyph_t * self,
 #endif
 
 #endif /* __TEXTURE_FONT_H__ */
-
