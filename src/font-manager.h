@@ -180,7 +180,6 @@ typedef struct {
 /**
  *  Search for a font filename that match description.
  *
- *  @param self    a font manager
  *  @param family   font family
  *  @param size     font size
  *  @param bold     whether font is bold
@@ -189,8 +188,7 @@ typedef struct {
  *  @return Requested font filename
  */
   char *
-  font_manager_match_description( font_manager_t * self,
-                                  const char * family,
+  font_manager_match_description( const char * family,
                                   const float size,
                                   const int bold,
                                   const int italic );

@@ -31,14 +31,15 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include "text-buffer.h"
+
+#include "opengl.h"
+#include "shader.h"
 #include <assert.h>
 #include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "opengl.h"
-#include "text-buffer.h"
-#include "font-manager.h"
 
 #define SET_GLYPH_VERTEX(value,x0,y0,z0,s0,t0,r,g,b,a,sh,gm) { \
     glyph_vertex_t *gv=&value;                                 \
@@ -50,19 +51,13 @@
 
 // ----------------------------------------------------------------------------
 text_buffer_t *
-text_buffer_new_with(
-    font_manager_t *manager,
-    char *shader_vert_filename, char *shader_frag_filename )
+text_buffer_new( texture_atlas_t *atlas, GLuint shader )
 {
 
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f:2g1f" );
-    self->manager = manager;
-    self->shader = shader_load(shader_vert_filename, shader_frag_filename);
-    if((GLuint)-1 == self->shader) {
-        free(self);
-        return NULL;
-    }
+    self->atlas = atlas;
+    self->shader = shader;
     self->shader_texture = glGetUniformLocation(self->shader, "texture");
     self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
     self->line_start = 0;
@@ -71,11 +66,10 @@ text_buffer_new_with(
     return self;
 }
 
-text_buffer_t *
-text_buffer_new( size_t depth )
+void
+text_buffer_delete( text_buffer_t *self )
 {
-    font_manager_t *manager = font_manager_new(512, 512, depth);
-    text_buffer_new_with ( manager, "shaders/text.vert", "shaders/text.frag" );
+    vertex_buffer_delete(self->buffer);
 }
 
 // ----------------------------------------------------------------------------
@@ -86,14 +80,11 @@ text_buffer_render( text_buffer_t * self )
     glEnable( GL_TEXTURE_2D );
     glColor4f( 1.0, 1.0, 1.0, 1.0);
 
-    if( self->manager->atlas->depth == 1 )
-    {
+    if( self->atlas->depth == 1 ) {
         glDisable( GL_COLOR_MATERIAL );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
-    }
-    else
-    {
+    } else {
         glEnable( GL_COLOR_MATERIAL );
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
@@ -101,9 +92,9 @@ text_buffer_render( text_buffer_t * self )
         glUseProgram( self->shader );
         glUniform1i( self->shader_texture, 0 );
         glUniform3f( self->shader_pixel,
-                     1.0/self->manager->atlas->width,
-                     1.0/self->manager->atlas->height,
-                 self->manager->atlas->depth );
+                     1.0/self->atlas->width,
+                     1.0/self->atlas->height,
+                     self->atlas->depth );
         vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
         glUseProgram( 0 );
     }
@@ -135,68 +126,7 @@ text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
     va_end ( args );
 }
 
-// ----------------------------------------------------------------------------
-void
-text_buffer_add_text( text_buffer_t * self,
-                      vec2 * pen, markup_t * markup,
-                      wchar_t * text, size_t length )
-{
-    vertex_buffer_t * buffer = self->buffer;
-    font_manager_t * manager = self->manager;
-
-    assert (self);
-    assert (pen);
-    assert (markup);
-    assert (text);
-    if (!markup->font) {
-        int res = font_manager_load_markup_font(manager, markup);
-        assert (0 == res);
-        assert (markup->font);
-    }
-
-    if( length == 0 )
-    {
-        length = wcslen(text);
-    }
-
-    if( vertex_buffer_size( self->buffer ) == 0 )
-    {
-        self->origin = *pen;
-    }
-
-    if( markup->font->ascender > self->line_ascender )
-    {
-        size_t i, j;
-        float dy = (int)(markup->font->ascender - self->line_ascender);
-        for( i=self->line_start; i < vector_size( buffer->items ); ++i )
-        {
-            ivec4 *item = (ivec4 *) vector_get( buffer->items, i);
-            for( j=item->vstart; j<item->vstart+item->vcount; ++j)
-            {
-                glyph_vertex_t * vertex =
-                    (glyph_vertex_t *)  vector_get( buffer->vertices, j );
-                vertex->y -= dy;
-            }
-        }
-        self->line_ascender = markup->font->ascender;
-        pen->y -= dy;
-    }
-    if( markup->font->descender < self->line_descender )
-    {
-        self->line_descender = markup->font->descender;
-    }
-
-    text_buffer_add_wchar( self, pen, markup, text[0], 0 );
-
-    size_t i;
-    for( i=1; i<length; ++i )
-    {
-        text_buffer_add_wchar( self, pen, markup, text[i], text[i-1] );
-    }
-}
-
-// ----------------------------------------------------------------------------
-void
+static void
 text_buffer_add_wchar( text_buffer_t * self,
                        vec2 * pen, markup_t * markup,
                        wchar_t current, wchar_t previous )
@@ -459,4 +389,59 @@ text_buffer_add_wchar( text_buffer_t * self,
 
     vertex_buffer_push_back( buffer, vertices, vcount, indices, icount );
     pen->x += glyph->advance_x;
+}
+
+// ----------------------------------------------------------------------------
+void
+text_buffer_add_text( text_buffer_t * self,
+                      vec2 * pen, markup_t * markup,
+                      wchar_t * text, size_t length )
+{
+    vertex_buffer_t * buffer = self->buffer;
+
+    assert (self);
+    assert (pen);
+    assert (markup);
+    assert (text);
+    assert (markup->font);
+
+    if( length == 0 )
+    {
+        length = wcslen(text);
+    }
+
+    if( vertex_buffer_size( self->buffer ) == 0 )
+    {
+        self->origin = *pen;
+    }
+
+    if( markup->font->ascender > self->line_ascender )
+    {
+        size_t i, j;
+        float dy = (int)(markup->font->ascender - self->line_ascender);
+        for( i=self->line_start; i < vector_size( buffer->items ); ++i )
+        {
+            ivec4 *item = (ivec4 *) vector_get( buffer->items, i);
+            for( j=item->vstart; j<item->vstart+item->vcount; ++j)
+            {
+                glyph_vertex_t * vertex =
+                    (glyph_vertex_t *)  vector_get( buffer->vertices, j );
+                vertex->y -= dy;
+            }
+        }
+        self->line_ascender = markup->font->ascender;
+        pen->y -= dy;
+    }
+    if( markup->font->descender < self->line_descender )
+    {
+        self->line_descender = markup->font->descender;
+    }
+
+    text_buffer_add_wchar( self, pen, markup, text[0], 0 );
+
+    size_t i;
+    for( i=1; i<length; ++i )
+    {
+        text_buffer_add_wchar( self, pen, markup, text[i], text[i-1] );
+    }
 }

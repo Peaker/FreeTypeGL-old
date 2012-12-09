@@ -187,7 +187,7 @@ font_manager_get_from_description( font_manager_t *self,
         fprintf( stderr, "\"font_manager_get_from_description\" not implemented yet.\n" );
         return 0;
 #endif
-        filename = font_manager_match_description( self, family, size, bold, italic );
+        filename = font_manager_match_description( family, size, bold, italic );
         if( !filename )
         {
             fprintf( stderr, "No \"%s (size=%.1f, bold=%d, italic=%d)\" font available.\n",
@@ -223,8 +223,7 @@ font_manager_load_markup_font(font_manager_t * manager, markup_t * markup)
 
 // ----------------------------------------- font_manager_match_description ---
 char *
-font_manager_match_description( font_manager_t * self,
-                                const char * family,
+font_manager_match_description( const char * family,
                                 const float size,
                                 const int bold,
                                 const int italic )

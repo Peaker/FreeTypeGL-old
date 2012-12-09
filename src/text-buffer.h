@@ -39,9 +39,8 @@ extern "C" {
 #endif
 
 #include "vertex-buffer.h"
-#include "font-manager.h"
+#include "texture-atlas.h"
 #include "markup.h"
-#include "shader.h"
 
 
 /**
@@ -84,10 +83,7 @@ typedef struct {
      */
     vertex_buffer_t *buffer;
 
-    /**
-     * Font manager
-     */
-    font_manager_t *manager;
+    texture_atlas_t *atlas;
 
     /**
      * Pen origin
@@ -194,27 +190,20 @@ typedef struct {
 /**
  * Creates a new empty text buffer.
  *
- * @param depth  Underlying atlas bit depth (1 or 3)
- *
  * @return  a new empty text buffer.
  *
  */
   text_buffer_t *
-  text_buffer_new( size_t depth );
+  text_buffer_new( texture_atlas_t *atlas, GLuint shader );
 
 /**
- * Creates a new empty text buffer.
+ * Delete a text buffer.
  *
- * @param manager  Underlying manager
- * @param shader_vert_filename  Filename for shader vertices (e.g: "shaders/text.vert")
- * @param shader_frag_filename  Filename for shader frag (e.g: "shaders/text.frag")
- *
- * @return  a new empty text buffer.
+ * @param self a text buffer
  *
  */
-  text_buffer_t *
-  text_buffer_new_with( font_manager_t *manager,
-                        char *shader_vert_filename, char *shader_frag_filename );
+  void
+  text_buffer_delete( text_buffer_t *self );
 
 
 /**
@@ -252,20 +241,6 @@ typedef struct {
   text_buffer_add_text( text_buffer_t * self,
                         vec2 * pen, markup_t * markup,
                         wchar_t * text, size_t length );
-
- /**
-  * Add a char to the text buffer
-  *
-  * @param self     a text buffer
-  * @param pen      position of text start
-  * @param markup   markup to be used to add text
-  * @param current  charactr to be added
-  * @param previous previous character (if any)
-  */
-  void
-  text_buffer_add_wchar( text_buffer_t * self,
-                         vec2 * pen, markup_t * markup,
-                         wchar_t current, wchar_t previous );
 
 /**
   * Clear text buffer
