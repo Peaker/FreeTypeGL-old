@@ -2,7 +2,7 @@ import Control.Monad (forever)
 import Graphics.Rendering.FreeTypeGL.TextBuffer (TextBuffer)
 import Graphics.Rendering.OpenGL.GL (($=))
 import System.Environment (getArgs)
-import qualified Graphics.Rendering.FreeTypeGL.FontManager as FontManager
+import qualified Graphics.Rendering.FreeTypeGL.Atlas as Atlas
 import qualified Graphics.Rendering.FreeTypeGL.TextBuffer as TextBuffer
 import qualified Graphics.Rendering.OpenGL.GL as GL
 import qualified Graphics.UI.GLFW as GLFW
@@ -43,9 +43,9 @@ main :: IO ()
 main = do
   [ttfFilename] <- getArgs
   initScreen
-  manager <- FontManager.new (512, 512) 3 -- depth
-  textBuffer <- TextBuffer.new manager "src/shaders/text.vert" "src/shaders/text.frag"
-  font <- FontManager.loadFont manager ttfFilename
+  atlas <- Atlas.new (512, 512) 3 -- depth
+  textBuffer <- TextBuffer.new atlas "src/shaders/text.vert" "src/shaders/text.frag"
+  font <- Atlas.loadFont atlas ttfFilename
   pen <- TextBuffer.newPen
   reshape
   GLFW.setWindowCloseCallback $ error "Quit"

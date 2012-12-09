@@ -3,9 +3,10 @@ module Graphics.Rendering.FreeTypeGL.Markup(Markup, Markup_S(..), Color(..)) whe
 
 import Control.Applicative
 import Foreign (Ptr, plusPtr)
-import Foreign.Storable (Storable(..))
-import Foreign.C.String (CString)
+import Foreign.C.String (peekCString, withCString)
 import Foreign.C.Types (CFloat, CInt)
+import Foreign.Storable (Storable(..))
+import Graphics.Rendering.FreeTypeGL.FontDesc(FontDesc(..))
 
 type Markup = Ptr Markup_S
 
@@ -25,10 +26,7 @@ pokeColor ptr (Color r g b a) = mapM_ p $ zip [0..] [r, g, b, a]
     p (off, val) = pokeElemOff ptr off val
 
 data Markup_S = Markup_S
-  { family :: CString
-  , size :: CFloat
-  , bold :: CInt
-  , italic :: CInt
+  { desc :: FontDesc
   , rise :: CFloat
   , spacing :: CFloat
   , gamma :: CFloat
@@ -47,14 +45,20 @@ data Markup_S = Markup_S
 
 #include "markup.h"
 
+boolFromCInt :: CInt -> Bool
+boolFromCInt = toEnum . fromIntegral
+
+cintFromBool :: Bool -> CInt
+cintFromBool = fromIntegral . fromEnum
+
 instance Storable Markup_S where
   sizeOf _    = #size markup_t
   alignment _ = 4 -- #alignment markup_t
   peek ptr = do
-    family' <- (#peek markup_t, family) ptr
+    family' <- peekCString =<< (#peek markup_t, family) ptr
     size' <- (#peek markup_t, size) ptr
-    bold' <- (#peek markup_t, bold) ptr
-    italic' <- (#peek markup_t, italic) ptr
+    bold' <- boolFromCInt <$> (#peek markup_t, bold) ptr
+    italic' <- boolFromCInt <$>(#peek markup_t, italic) ptr
     rise' <- (#peek markup_t, rise) ptr
     spacing' <- (#peek markup_t, spacing) ptr
     gamma' <- (#peek markup_t, gamma) ptr
@@ -70,10 +74,7 @@ instance Storable Markup_S where
     strikethrough_color' <- peekColor $ (#ptr markup_t, strikethrough_color) ptr
     font' <- (#peek markup_t, font) ptr
     return $ Markup_S
-      family'
-      size'
-      bold'
-      italic'
+      (FontDesc family' size' bold' italic')
       rise'
       spacing'
       gamma'
@@ -90,29 +91,27 @@ instance Storable Markup_S where
       font'
   poke ptr
     (Markup_S
-      family'
-      size'
-      bold'
-      italic'
-      rise'
-      spacing'
-      gamma'
-      foreground_color'
-      background_color'
-      outline'
-      outline_color'
-      underline'
-      underline_color'
-      overline'
-      overline_color'
-      strikethrough'
-      strikethrough_color'
-      font'
+     (FontDesc family' size' bold' italic')
+     rise'
+     spacing'
+     gamma'
+     foreground_color'
+     background_color'
+     outline'
+     outline_color'
+     underline'
+     underline_color'
+     overline'
+     overline_color'
+     strikethrough'
+     strikethrough_color'
+     font'
     ) = do
-      (#poke markup_t, family) ptr family'
+      withCString family' $ \familyPtr ->
+        (#poke markup_t, family) ptr familyPtr
       (#poke markup_t, size) ptr size'
-      (#poke markup_t, bold) ptr bold'
-      (#poke markup_t, italic) ptr italic'
+      (#poke markup_t, bold) ptr $ cintFromBool bold'
+      (#poke markup_t, italic) ptr $ cintFromBool italic'
       (#poke markup_t, rise) ptr rise'
       (#poke markup_t, spacing) ptr spacing'
       (#poke markup_t, gamma) ptr gamma'

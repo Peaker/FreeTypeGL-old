@@ -1,15 +1,16 @@
 {-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
-module Graphics.Rendering.FreeTypeGL.FontManager(FontManager, new, loadFont) where
+module Graphics.Rendering.FreeTypeGL.FontManager(FontManager, loadFont) where
 
 import Foreign (Ptr, nullPtr)
-import Foreign.C.String (newCString)
 import Foreign.C.Types (CSize(..), CInt(..))
 import Foreign.Marshal.Alloc (malloc)
 import Foreign.Marshal.Error (throwIf_)
 import Foreign.Storable (Storable(..))
 import Graphics.Rendering.FreeTypeGL.Markup (Markup, Markup_S(..), Color(..))
 
-data FontManager_S
+newtype FontCache = FontCache
+  { fontCache :: Map FontDesc TextureFont
+  }
 type FontManager = Ptr FontManager_S
 
 type Size = (Int, Int)

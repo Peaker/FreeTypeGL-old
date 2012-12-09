@@ -17,11 +17,12 @@ Library
   Exposed-modules: Graphics.Rendering.FreeTypeGL,
                    Graphics.Rendering.FreeTypeGL.FontManager,
                    Graphics.Rendering.FreeTypeGL.TextBuffer,
+                   Graphics.Rendering.FreeTypeGL.Atlas,
                    Graphics.Rendering.FreeTypeGL.Markup
 
   -- Packages needed in order to build this package.
   -- "freetype2" and "OpenGL" deps are just for the C build side
-  Build-depends: base > 3 && < 5, freetype2, OpenGL
+  Build-depends: base > 3 && < 5, freetype2, OpenGL, Tensor
 
   -- Modules not exported by this package.
   -- Other-modules:

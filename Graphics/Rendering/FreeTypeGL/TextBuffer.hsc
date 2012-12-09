@@ -10,7 +10,7 @@ import Foreign.C.String (CWString, withCWStringLen, CString, withCString)
 import Foreign.ForeignPtr (ForeignPtr, mallocForeignPtrArray, withForeignPtr)
 import Foreign.Marshal.Array (pokeArray)
 import Foreign.Marshal.Error (throwIfNull)
-import Graphics.Rendering.FreeTypeGL.FontManager (FontManager)
+import Graphics.Rendering.FreeTypeGL.Atlas (Atlas)
 import Graphics.Rendering.FreeTypeGL.Markup (Markup)
 
 #include "text-buffer.h"
@@ -18,8 +18,8 @@ import Graphics.Rendering.FreeTypeGL.Markup (Markup)
 data TextBuffer_S
 type TextBuffer = Ptr TextBuffer_S
 
-foreign import ccall "text_buffer_new_with"
-  c_text_buffer_new_with :: FontManager -> CString -> CString -> IO TextBuffer
+foreign import ccall "text_buffer_new"
+  c_text_buffer_new :: Atlas -> CString -> CString -> IO TextBuffer
 
 foreign import ccall "text_buffer_render"
   c_text_buffer_render :: TextBuffer -> IO ()
@@ -36,12 +36,12 @@ newPen = do
     pokeArray penPtr [0, 0]
   return pen
 
-new :: FontManager -> FilePath -> FilePath -> IO TextBuffer
-new fontManager vertFilename fragFilename =
+new :: Atlas -> FilePath -> FilePath -> IO TextBuffer
+new atlas vertFilename fragFilename =
   throwIfNull "Failed to load shader files" .
   withCString vertFilename $ \vertFilenamePtr ->
   withCString fragFilename $ \fragFilenamePtr ->
-  c_text_buffer_new_with fontManager vertFilenamePtr fragFilenamePtr
+  c_text_buffer_new atlas vertFilenamePtr fragFilenamePtr
 
 render :: TextBuffer -> IO ()
 render = c_text_buffer_render
