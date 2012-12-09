@@ -15,10 +15,10 @@ Cabal-version:       >=1.8
 Library
   -- Modules exported by the library.
   Exposed-modules: Graphics.Rendering.FreeTypeGL,
-                   Graphics.Rendering.FreeTypeGL.FontManager,
-                   Graphics.Rendering.FreeTypeGL.TextBuffer,
-                   Graphics.Rendering.FreeTypeGL.Atlas,
-                   Graphics.Rendering.FreeTypeGL.Markup
+                   Graphics.Rendering.FreeTypeGL.Internal.FontManager,
+                   Graphics.Rendering.FreeTypeGL.Internal.TextBuffer,
+                   Graphics.Rendering.FreeTypeGL.Internal.Atlas,
+                   Graphics.Rendering.FreeTypeGL.Internal.Markup
 
   -- Packages needed in order to build this package.
   -- "freetype2" and "OpenGL" deps are just for the C build side
@@ -67,6 +67,7 @@ Executable FreeTypeGL-example
   else
     Buildable: False
   Main-is:       Example.hs
+  ghc-options: -Wall
 
 source-repository head
   type: git

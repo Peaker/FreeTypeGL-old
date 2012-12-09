@@ -1,9 +1,9 @@
 import Control.Monad (forever)
-import Graphics.Rendering.FreeTypeGL.TextBuffer (TextBuffer)
+import Graphics.Rendering.FreeTypeGL.Internal.TextBuffer (TextBuffer)
 import Graphics.Rendering.OpenGL.GL (($=))
 import System.Environment (getArgs)
-import qualified Graphics.Rendering.FreeTypeGL.Atlas as Atlas
-import qualified Graphics.Rendering.FreeTypeGL.TextBuffer as TextBuffer
+import qualified Graphics.Rendering.FreeTypeGL.Internal.Atlas as Atlas
+import qualified Graphics.Rendering.FreeTypeGL.Internal.TextBuffer as TextBuffer
 import qualified Graphics.Rendering.OpenGL.GL as GL
 import qualified Graphics.UI.GLFW as GLFW
 

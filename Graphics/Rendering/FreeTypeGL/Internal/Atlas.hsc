@@ -1,5 +1,5 @@
 {-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
-module Graphics.Rendering.FreeTypeGL.Atlas(Atlas, new, Vector2(..)) where
+module Graphics.Rendering.FreeTypeGL.Internal.Atlas(Atlas, new, Vector2(..)) where
 
 import Data.Tensor (Vector2(..))
 import Foreign (Ptr)
