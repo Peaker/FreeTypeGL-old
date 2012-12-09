@@ -31,18 +31,12 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#if 0
-#  if !defined(_WIN32) && !defined(_WIN64)
-#    include <fontconfig/fontconfig.h>
-#  endif
-#endif
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
 #include "font-manager.h"
-
 
 // ------------------------------------------------------------ file_exists ---
 int
@@ -162,122 +156,23 @@ font_manager_get_from_filename( font_manager_t *self,
     return 0;
 }
 
-
-// ----------------------------------------- font_manager_get_from_description ---
 texture_font_t *
-font_manager_get_from_description( font_manager_t *self,
-                                   const char * family,
-                                   const float size,
-                                   const int bold,
-                                   const int italic )
+font_manager_get_from_desc( font_manager_t *self, const font_desc_t *desc )
 {
     assert( self );
 
 
-    texture_font_t *font;
-    char *filename = 0;
-
-    if( file_exists( family ) )
-    {
-        filename = strdup( family );
+    if( file_exists( desc->family ) ) {
+        return font_manager_get_from_filename( self, desc->family, desc->size );
     }
-    else
-    {
-#if defined(_WIN32) || defined(_WIN64)
-        fprintf( stderr, "\"font_manager_get_from_description\" not implemented yet.\n" );
-        return 0;
-#endif
-        filename = font_manager_match_description( family, size, bold, italic );
-        if( !filename )
-        {
-            fprintf( stderr, "No \"%s (size=%.1f, bold=%d, italic=%d)\" font available.\n",
-                     family, size, bold, italic );
-            return 0;
-        }
-    }
-    font = font_manager_get_from_filename( self, filename, size );
 
-    free( filename );
+    char *filename = font_desc_find_filename( desc );
+    if( !filename ) return 0;
+
+    texture_font_t *font =
+        font_manager_get_from_filename( self, filename, desc->size );
+
+    free (filename);
+
     return font;
-}
-
-// ------------------------------------------- font_manager_get_from_markup ---
-texture_font_t *
-font_manager_get_from_markup( font_manager_t *self,
-                              const markup_t *markup )
-{
-    assert( self );
-    assert( markup );
-
-    return font_manager_get_from_description( self, markup->family, markup->size,
-                                              markup->bold,   markup->italic );
-}
-
-int
-font_manager_load_markup_font(font_manager_t * manager, markup_t * markup)
-{
-    if(markup->font) return 0;
-    markup->font = font_manager_get_from_markup( manager, markup );
-    return markup->font ? 0 : -1;
-}
-
-// ----------------------------------------- font_manager_match_description ---
-char *
-font_manager_match_description( const char * family,
-                                const float size,
-                                const int bold,
-                                const int italic )
-{
-// Use of fontconfig is disabled by default.
-#if 1
-    return 0;
-#else
-#  if defined _WIN32 || defined _WIN64
-      fprintf( stderr, "\"font_manager_match_description\" not implemented for windows.\n" );
-      return 0;
-#  endif
-    char *filename = 0;
-    int weight = FC_WEIGHT_REGULAR;
-    int slant = FC_SLANT_ROMAN;
-    if ( bold )
-    {
-        weight = FC_WEIGHT_BOLD;
-    }
-    if( italic )
-    {
-        slant = FC_SLANT_ITALIC;
-    }
-    FcInit();
-    FcPattern *pattern = FcPatternCreate();
-    FcPatternAddDouble( pattern, FC_SIZE, size );
-    FcPatternAddInteger( pattern, FC_WEIGHT, weight );
-    FcPatternAddInteger( pattern, FC_SLANT, slant );
-    FcPatternAddString( pattern, FC_FAMILY, (FcChar8*) family );
-    FcConfigSubstitute( 0, pattern, FcMatchPattern );
-    FcDefaultSubstitute( pattern );
-    FcResult result;
-    FcPattern *match = FcFontMatch( 0, pattern, &result );
-    FcPatternDestroy( pattern );
-
-    if ( !match )
-    {
-        fprintf( stderr, "fontconfig error: could not match family '%s'", family );
-        return 0;
-    }
-    else
-    {
-        FcValue value;
-        FcResult result = FcPatternGet( match, FC_FILE, 0, &value );
-        if ( result )
-        {
-            fprintf( stderr, "fontconfig error: could not match family '%s'", family );
-        }
-        else
-        {
-            filename = strdup( (char *)(value.u.s) );
-        }
-    }
-    FcPatternDestroy( match );
-    return filename;
-#endif
 }

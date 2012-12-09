@@ -40,6 +40,7 @@ extern "C" {
 
 #include "vector.h"
 #include "markup.h"
+#include "font-desc.h"
 #include "texture-font.h"
 #include "texture-atlas.h"
 
@@ -149,52 +150,12 @@ typedef struct {
  *  Request for a font based on a description
  *
  *  @param self     a font manager
- *  @param family   font family
- *  @param size     font size
- *  @param bold     whether font is bold
- *  @param italic   whether font is italic
+ *  @param desc     font desc
  *
  *  @return Requested font
  */
   texture_font_t *
-  font_manager_get_from_description( font_manager_t * self,
-                                     const char * family,
-                                     const float size,
-                                     const int bold,
-                                     const int italic );
-
-
-/**
- *  Request for a font based on a markup
- *
- *  @param self    a font manager
- *  @param markup  Markup describing a font
- *
- *  @return Requested font
- */
-  texture_font_t *
-  font_manager_get_from_markup( font_manager_t *self,
-                                const markup_t *markup );
-
-
-/**
- *  Search for a font filename that match description.
- *
- *  @param family   font family
- *  @param size     font size
- *  @param bold     whether font is bold
- *  @param italic   whether font is italic
- *
- *  @return Requested font filename
- */
-  char *
-  font_manager_match_description( const char * family,
-                                  const float size,
-                                  const int bold,
-                                  const int italic );
-
-  int
-  font_manager_load_markup_font(font_manager_t *, markup_t *);
+  font_manager_get_from_desc( font_manager_t *self, const font_desc_t * );
 
 /** @} */
 

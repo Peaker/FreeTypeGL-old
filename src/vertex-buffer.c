@@ -216,7 +216,7 @@ vertex_buffer_print( vertex_buffer_t * self )
 
     int i = 0;
 
-    fprintf( stderr, "%ld vertices, %ld indices\n",
+    fprintf( stderr, "%zd vertices, %zd indices\n",
              vector_size( self->vertices ), vector_size( self->indices ) );
 
     while( self->attributes[i] )

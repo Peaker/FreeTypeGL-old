@@ -41,15 +41,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#define SET_GLYPH_VERTEX(value,x0,y0,z0,s0,t0,r,g,b,a,sh,gm) { \
-    glyph_vertex_t *gv=&value;                                 \
-    gv->x=x0; gv->y=y0; gv->z=z0;                              \
-    gv->u=s0; gv->v=t0;                                        \
-    gv->r=r; gv->g=g; gv->b=b; gv->a=a;                        \
-    gv->shift=sh; gv->gamma=gm;}
-
-
-// ----------------------------------------------------------------------------
 text_buffer_t *
 text_buffer_new( texture_atlas_t *atlas, GLuint shader )
 {
@@ -100,42 +91,93 @@ text_buffer_render( text_buffer_t * self )
     }
 }
 
-// ----------------------------------------------------------------------------
-void
-text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
+struct coordinates {
+    glyph_vertex_t *start_vertex;
+    glyph_vertex_t *cur_vertex;
+    glyph_vertex_t *end_vertex;
+    GLuint *start_index;
+    GLuint *cur_index;
+    GLuint *end_index;
+};
+
+static GLuint
+add_next_vertex( struct coordinates *coors, vec4 *color, float x, float y, float s, float t, float gamma )
 {
-    markup_t *markup;
-    wchar_t *text;
+    float r = color->r;
+    float g = color->g;
+    float b = color->b;
+    float a = color->a;
 
-    if( vertex_buffer_size( self->buffer ) == 0 )
-    {
-        self->origin = *pen;
-    }
+    glyph_vertex_t *gv = coors->cur_vertex;
+    assert (gv < coors->end_vertex);
+    coors->cur_vertex++;
 
-    va_list args;
-    va_start ( args, pen );
-    do {
-        markup = va_arg( args, markup_t * );
-        if( markup == NULL )
-        {
-            return;
-        }
-        text = va_arg( args, wchar_t * );
-        text_buffer_add_text( self, pen, markup, text, wcslen(text) );
-    } while( markup != 0 );
-    va_end ( args );
+    gv->x=(int)x;
+    gv->y=y;
+    gv->z=0;
+    gv->u=s;
+    gv->v=t;
+    gv->r=r; gv->g=g; gv->b=b; gv->a=a;
+    gv->shift=x - (int)x;
+    gv->gamma=gamma;
+
+    return gv - coors->start_vertex;
+}
+
+static GLuint *
+add_next_index( struct coordinates *coors )
+{
+    GLuint *i = coors->cur_index;
+    assert (i < coors->end_index);
+    coors->cur_index++;
+    return i;
+}
+
+static void
+add_glyph( struct coordinates *coors,
+           vec2 *pen, vec4 *color,
+           float x0_offset, float y0_offset,
+           float x1_offset, float y1_offset,
+           float gamma,
+           texture_glyph_t *glyph )
+{
+    float x0 = ( pen->x + x0_offset );
+    float y0 = (int)( pen->y + y0_offset );
+    float x1 = ( x0 + x1_offset );
+    float y1 = (int)( y0 + y1_offset );
+    float s0 = glyph->s0;
+    float t0 = glyph->t0;
+    float s1 = glyph->s1;
+    float t1 = glyph->t1;
+    GLuint v0 = add_next_vertex (coors, color, x0, y0, s0, t0, gamma);
+    GLuint v1 = add_next_vertex (coors, color, x0, y1, s0, t1, gamma);
+    GLuint v2 = add_next_vertex (coors, color, x1, y1, s1, t1, gamma);
+    GLuint v3 = add_next_vertex (coors, color, x1, y0, s1, t0, gamma);
+    *add_next_index(coors) = v0;
+    *add_next_index(coors) = v1;
+    *add_next_index(coors) = v2;
+    *add_next_index(coors) = v0;
+    *add_next_index(coors) = v2;
+    *add_next_index(coors) = v3;
+}
+
+static void
+coors_push_to_vector( struct coordinates *coors, vertex_buffer_t * buffer )
+{
+    vertex_buffer_push_back(
+        buffer,
+        coors->start_vertex,
+        coors->cur_vertex - coors->start_vertex,
+        coors->start_index,
+        coors->cur_index - coors->start_index );
 }
 
 static void
 text_buffer_add_wchar( text_buffer_t * self,
                        vec2 * pen, markup_t * markup,
+                       texture_font_t * font,
                        wchar_t current, wchar_t previous )
 {
-    size_t vcount = 0;
-    size_t icount = 0;
-    vertex_buffer_t * buffer = self->buffer;
-    size_t i = 0;
-    texture_font_t * font = markup->font;
     float gamma = markup->gamma;
 
     // Maximum number of vertices is 20 (= 5x2 triangles) per glyph:
@@ -146,6 +188,12 @@ text_buffer_add_wchar( text_buffer_t * self,
     //  - 2 triangles for glyph
     glyph_vertex_t vertices[4*5];
     GLuint indices[6*5];
+    struct coordinates coors = {
+        vertices, vertices,
+        vertices + sizeof vertices / sizeof *vertices,
+        indices, indices,
+        indices + sizeof indices / sizeof *indices
+    };
 
     if( current == L'\n' )
     {
@@ -165,229 +213,48 @@ text_buffer_add_wchar( text_buffer_t * self,
         return;
     }
 
-    float kerning = 0;
-    if( i > 0)
-    {
-        kerning = texture_glyph_get_kerning( glyph, previous );
-    }
+    float kerning = previous ? texture_glyph_get_kerning( glyph, previous ) : 0;
     pen->x += kerning;
 
     // Background
-    if( markup->background_color.alpha > 0 )
-    {
-        float r = markup->background_color.r;
-        float g = markup->background_color.g;
-        float b = markup->background_color.b;
-        float a = markup->background_color.a;
-        float x0 = ( pen->x -kerning );
-        float y0 = (int)( pen->y + font->descender );
-        float x1 = ( x0 + glyph->advance_x );
-        float y1 = (int)( y0 + font->height + font->linegap );
-        float s0 = black->s0;
-        float t0 = black->t0;
-        float s1 = black->s1;
-        float t1 = black->t1;
-
-        SET_GLYPH_VERTEX(vertices[vcount+0],
-                         (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+1],
-                         (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+2],
-                         (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+3],
-                         (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-        vertices[vcount+0] =
-            (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+1] =
-            (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+2] =
-            (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-        vertices[vcount+3] =
-            (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
-        indices[icount + 0] = vcount+0;
-        indices[icount + 1] = vcount+1;
-        indices[icount + 2] = vcount+2;
-        indices[icount + 3] = vcount+0;
-        indices[icount + 4] = vcount+2;
-        indices[icount + 5] = vcount+3;
-        vcount += 4;
-        icount += 6;
+    if( markup->background_color.alpha > 0 ) {
+        add_glyph(&coors, pen, &markup->background_color,
+                  -kerning, font->descender,
+                  glyph->advance_x, font->height + font->linegap,
+                  gamma, black);
     }
 
     // Underline
-    if( markup->underline )
-    {
-        float r = markup->underline_color.r;
-        float g = markup->underline_color.g;
-        float b = markup->underline_color.b;
-        float a = markup->underline_color.a;
-        float x0 = ( pen->x - kerning );
-        float y0 = (int)( pen->y + font->underline_position );
-        float x1 = ( x0 + glyph->advance_x );
-        float y1 = (int)( y0 + font->underline_thickness );
-        float s0 = black->s0;
-        float t0 = black->t0;
-        float s1 = black->s1;
-        float t1 = black->t1;
-
-        SET_GLYPH_VERTEX(vertices[vcount+0],
-                         (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+1],
-                         (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+2],
-                         (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+3],
-                         (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-        vertices[vcount+0] =
-            (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+1] =
-            (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+2] =
-            (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-        vertices[vcount+3] =
-            (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
-        indices[icount + 0] = vcount+0;
-        indices[icount + 1] = vcount+1;
-        indices[icount + 2] = vcount+2;
-        indices[icount + 3] = vcount+0;
-        indices[icount + 4] = vcount+2;
-        indices[icount + 5] = vcount+3;
-        vcount += 4;
-        icount += 6;
+    if( markup->underline ) {
+        add_glyph(&coors, pen, &markup->underline_color,
+                  -kerning, font->underline_position,
+                  glyph->advance_x, font->underline_thickness,
+                  gamma, black);
     }
 
     // Overline
-    if( markup->overline )
-    {
-        float r = markup->overline_color.r;
-        float g = markup->overline_color.g;
-        float b = markup->overline_color.b;
-        float a = markup->overline_color.a;
-        float x0 = ( pen->x -kerning );
-        float y0 = (int)( pen->y + (int)font->ascender );
-        float x1 = ( x0 + glyph->advance_x );
-        float y1 = (int)( y0 + (int)font->underline_thickness );
-        float s0 = black->s0;
-        float t0 = black->t0;
-        float s1 = black->s1;
-        float t1 = black->t1;
-        SET_GLYPH_VERTEX(vertices[vcount+0],
-                         (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+1],
-                         (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+2],
-                         (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+3],
-                         (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-        vertices[vcount+0] =
-            (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+1] =
-            (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+2] =
-            (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-        vertices[vcount+3] =
-            (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
-        indices[icount + 0] = vcount+0;
-        indices[icount + 1] = vcount+1;
-        indices[icount + 2] = vcount+2;
-        indices[icount + 3] = vcount+0;
-        indices[icount + 4] = vcount+2;
-        indices[icount + 5] = vcount+3;
-        vcount += 4;
-        icount += 6;
+    if( markup->overline ) {
+        add_glyph(&coors, pen, &markup->overline_color,
+                  -kerning, (int)font->ascender,
+                  glyph->advance_x, (int)font->underline_thickness,
+                  gamma, black);
     }
 
     /* Strikethrough */
-    if( markup->strikethrough )
-    {
-        float r = markup->strikethrough_color.r;
-        float g = markup->strikethrough_color.g;
-        float b = markup->strikethrough_color.b;
-        float a = markup->strikethrough_color.a;
-        float x0  = ( pen->x -kerning );
-        float y0  = (int)( pen->y + (int)font->ascender*.33);
-        float x1  = ( x0 + glyph->advance_x );
-        float y1  = (int)( y0 + (int)font->underline_thickness );
-        float s0 = black->s0;
-        float t0 = black->t0;
-        float s1 = black->s1;
-        float t1 = black->t1;
-        SET_GLYPH_VERTEX(vertices[vcount+0],
-                         (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+1],
-                         (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+2],
-                         (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
-        SET_GLYPH_VERTEX(vertices[vcount+3],
-                         (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-        vertices[vcount+0] =
-            (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+1] =
-            (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+2] =
-            (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-        vertices[vcount+3] =
-            (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
-        indices[icount + 0] = vcount+0;
-        indices[icount + 1] = vcount+1;
-        indices[icount + 2] = vcount+2;
-        indices[icount + 3] = vcount+0;
-        indices[icount + 4] = vcount+2;
-        indices[icount + 5] = vcount+3;
-        vcount += 4;
-        icount += 6;
+    if( markup->strikethrough ) {
+        add_glyph(&coors, pen, &markup->strikethrough_color,
+                  -kerning, (int)font->ascender*.33,
+                  glyph->advance_x, font->underline_thickness,
+                  gamma, black);
     }
 
     // Actual glyph
-    float r = markup->foreground_color.red;
-    float g = markup->foreground_color.green;
-    float b = markup->foreground_color.blue;
-    float a = markup->foreground_color.alpha;
-    float x0 = ( pen->x + glyph->offset_x );
-    float y0 = (int)( pen->y + glyph->offset_y );
-    float x1 = ( x0 + glyph->width );
-    float y1 = (int)( y0 - glyph->height );
-    float s0 = glyph->s0;
-    float t0 = glyph->t0;
-    float s1 = glyph->s1;
-    float t1 = glyph->t1;
+    add_glyph(&coors, pen, &markup->foreground_color,
+              glyph->offset_x, glyph->offset_y,
+              glyph->width, -glyph->height,
+              gamma, glyph);
 
-    SET_GLYPH_VERTEX(vertices[vcount+0],
-                     (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
-    SET_GLYPH_VERTEX(vertices[vcount+1],
-                     (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
-    SET_GLYPH_VERTEX(vertices[vcount+2],
-                     (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
-    SET_GLYPH_VERTEX(vertices[vcount+3],
-                     (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-    vertices[vcount+0] =
-        (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-    vertices[vcount+1] =
-        (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-    vertices[vcount+2] =
-        (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-    vertices[vcount+3] =
-        (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
-    indices[icount + 0] = vcount+0;
-    indices[icount + 1] = vcount+1;
-    indices[icount + 2] = vcount+2;
-    indices[icount + 3] = vcount+0;
-    indices[icount + 4] = vcount+2;
-    indices[icount + 5] = vcount+3;
-    vcount += 4;
-    icount += 6;
-
-    vertex_buffer_push_back( buffer, vertices, vcount, indices, icount );
+    coors_push_to_vector( &coors, self->buffer );
     pen->x += glyph->advance_x;
 }
 
@@ -395,30 +262,17 @@ text_buffer_add_wchar( text_buffer_t * self,
 void
 text_buffer_add_text( text_buffer_t * self,
                       vec2 * pen, markup_t * markup,
+                      texture_font_t * font,
                       wchar_t * text, size_t length )
 {
     vertex_buffer_t * buffer = self->buffer;
 
-    assert (self);
-    assert (pen);
-    assert (markup);
-    assert (text);
-    assert (markup->font);
+    if( 0 == length ) length = wcslen(text);
+    if( 0 == vertex_buffer_size( self->buffer ) ) self->origin = *pen;
 
-    if( length == 0 )
-    {
-        length = wcslen(text);
-    }
-
-    if( vertex_buffer_size( self->buffer ) == 0 )
-    {
-        self->origin = *pen;
-    }
-
-    if( markup->font->ascender > self->line_ascender )
-    {
+    if( font->ascender > self->line_ascender ) {
         size_t i, j;
-        float dy = (int)(markup->font->ascender - self->line_ascender);
+        float dy = (int)(font->ascender - self->line_ascender);
         for( i=self->line_start; i < vector_size( buffer->items ); ++i )
         {
             ivec4 *item = (ivec4 *) vector_get( buffer->items, i);
@@ -429,19 +283,18 @@ text_buffer_add_text( text_buffer_t * self,
                 vertex->y -= dy;
             }
         }
-        self->line_ascender = markup->font->ascender;
+        self->line_ascender = font->ascender;
         pen->y -= dy;
     }
-    if( markup->font->descender < self->line_descender )
-    {
-        self->line_descender = markup->font->descender;
+
+    if( font->descender < self->line_descender ) {
+        self->line_descender = font->descender;
     }
 
-    text_buffer_add_wchar( self, pen, markup, text[0], 0 );
+    text_buffer_add_wchar( self, pen, markup, font, text[0], 0 );
 
     size_t i;
-    for( i=1; i<length; ++i )
-    {
-        text_buffer_add_wchar( self, pen, markup, text[i], text[i-1] );
+    for( i=1; i<length; ++i ) {
+        text_buffer_add_wchar( self, pen, markup, font, text[i], text[i-1] );
     }
 }

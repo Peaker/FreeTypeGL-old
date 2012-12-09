@@ -54,8 +54,12 @@ shader_read( const char *filename )
     fseek( file, 0, SEEK_END );
     size = ftell( file );
     fseek(file, 0, SEEK_SET );
-    buffer = (char *) malloc( (size+1) * sizeof( char *) );
-    fread( buffer, sizeof(char), size, file );
+    buffer = (char *) malloc(size + 1);
+    size_t res = fread( buffer, 1, size, file );
+    if(res != size) {
+        fprintf( stderr, "Failed to read file \"%s\".\n Res=%zu", filename, res );
+        return NULL;
+    }
     buffer[size] = 0;
     fclose( file );
     return buffer;
@@ -74,10 +78,10 @@ shader_compile( const char* source,
 
     GLint compile_status;
     glGetShaderiv( handle, GL_COMPILE_STATUS, &compile_status );
-    if( compile_status == GL_FALSE )
+    if(GL_FALSE == compile_status)
     {
         GLchar messages[256];
-        glGetShaderInfoLog( handle, sizeof(messages), 0, &messages[0] );
+        glGetShaderInfoLog( handle, sizeof messages, 0, messages );
         fprintf( stderr, "%s\n", messages );
         return (GLuint)-1;
     }

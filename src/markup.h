@@ -37,7 +37,6 @@
 extern "C" {
 #endif
 
-#include "texture-font.h"
 #include "vec234.h"
 
 /**
@@ -70,7 +69,6 @@ extern "C" {
  *     .underline        = 0,     .underline_color     = black,
  *     .overline         = 0,     .overline_color      = black,
  *     .strikethrough    = 0,     .strikethrough_color = black,
- *     .font = 0,
  * };
  *
  * ...
@@ -86,26 +84,6 @@ extern "C" {
  */
 typedef struct
 {
-    /**
-     * A font family name such as "normal", "sans", "serif" or "monospace".
-     */
-    char * family;
-
-    /**
-     * Font size.
-     */
-    float size;
-
-    /**
-     * Whether text is bold.
-     */
-    int bold;
-
-    /**
-     * Whether text is italic.
-     */
-    int italic;
-
     /**
      * Vertical displacement from the baseline.
      */
@@ -170,17 +148,7 @@ typedef struct
      * Strikethrough color.
      */
     vec4 strikethrough_color;
-
-    /**
-     * Pointer on the corresponding font (family/size/bold/italic)
-     */
-    texture_font_t * font;
-
 } markup_t;
-
-
-extern markup_t default_markup;
-
 
 /** @} */
 

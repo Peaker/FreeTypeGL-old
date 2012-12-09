@@ -38,9 +38,10 @@
 extern "C" {
 #endif
 
-#include "vertex-buffer.h"
-#include "texture-atlas.h"
 #include "markup.h"
+#include "texture-atlas.h"
+#include "texture-font.h"
+#include "vertex-buffer.h"
 
 
 /**
@@ -240,6 +241,7 @@ typedef struct {
   void
   text_buffer_add_text( text_buffer_t * self,
                         vec2 * pen, markup_t * markup,
+                        texture_font_t * font,
                         wchar_t * text, size_t length );
 
 /**
