@@ -57,11 +57,11 @@ Flag examples
   Description: Build example programs
   Default: False
 
-Executable freetype-gl-example
+Executable FreeTypeGL-example
 
   if flag(examples)
     Buildable: True
-    Build-depends: base > 3 && < 5, freetype-gl
+    Build-depends: base > 3 && < 5, FreeTypeGL, GLFW-b, OpenGL
   else
     Buildable: False
   Main-is:       Example.hs
