@@ -50,6 +50,7 @@ extern "C" {
 
 #include "vector.h"
 #include "vec234.h"
+#include "opengl.h"
 
 /**
  * @file   texture-atlas.h
@@ -213,6 +214,11 @@ typedef struct
   void
   texture_atlas_clear( texture_atlas_t * self );
 
+
+  void
+  texture_atlas_render( texture_atlas_t * self,
+                        GLuint x, GLuint y,
+                        GLuint width, GLuint height );
 
 /** @} */
 

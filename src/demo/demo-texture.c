@@ -36,24 +36,23 @@
  * ============================================================================
  */
 #include "freetype-gl.h"
+#include <GL/glut.h>
 
-
+texture_atlas_t * atlas = NULL;
 
 // ---------------------------------------------------------------- display ---
-void display( void )
+static void display( void )
 {
     int viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
     GLuint width  = viewport[2];
     GLuint height = viewport[3];
 
+    glClearColor(1,1,1,1);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0, 1 ); glVertex2i( 0, 0 );
-    glTexCoord2f( 0, 0 ); glVertex2i( 0, height );
-    glTexCoord2f( 1, 0 ); glVertex2i( width, height );
-    glTexCoord2f( 1, 1 ); glVertex2i( width, 0 );
-    glEnd();
+
+    texture_atlas_render(atlas, 0, 0, width, height);
+
     glutSwapBuffers( );
 }
 
@@ -90,8 +89,9 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
-    const char *filename = "fonts/Vera.ttf";
+    atlas = texture_atlas_new( 512, 512, 1 );
+    assert(atlas);
+    const char *filename = "../fonts/Vera.ttf";
     const wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
                            L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
                            L"`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -102,26 +102,24 @@ int main( int argc, char **argv )
     for( i=minsize; i < maxsize; ++i )
     {
         texture_font_t * font = texture_font_new( atlas, filename, i );
+        if(!font) {
+            fprintf(stderr, "Failed to load font: \"%s\"\n", filename);
+            return -1;
+        }
         missed += texture_font_load_glyphs( font, cache );
         texture_font_delete( font );
     }
 
     printf( "Matched font               : %s\n", filename );
-    printf( "Number of fonts            : %ld\n", count );
-    printf( "Number of glyphs per font  : %ld\n", wcslen(cache) );
-    printf( "Number of missed glyphs    : %ld\n", missed );
-    printf( "Total number of glyphs     : %ld/%ld\n",
+    printf( "Number of fonts            : %zd\n", count );
+    printf( "Number of glyphs per font  : %zd\n", wcslen(cache) );
+    printf( "Number of missed glyphs    : %zd\n", missed );
+    printf( "Total number of glyphs     : %zd/%zd\n",
             wcslen(cache)*count - missed, wcslen(cache)*count );
-    printf( "Texture size               : %ldx%ld\n", atlas->width, atlas->height );
-    printf( "Texture occupancy          : %.2f%%\n", 
+    printf( "Texture size               : %zdx%zd\n", atlas->width, atlas->height );
+    printf( "Texture occupancy          : %.2f%%\n",
             100.0*atlas->used/(float)(atlas->width*atlas->height) );
 
-    glClearColor(1,1,1,1);
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
-    glColor4f(0,0,0,1);
-    glBindTexture( GL_TEXTURE_2D, atlas->id );
     glutMainLoop( );
 
     return 0;

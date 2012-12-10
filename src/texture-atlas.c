@@ -36,7 +36,6 @@
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
-#include "opengl.h"
 #include "texture-atlas.h"
 
 
@@ -312,4 +311,24 @@ texture_atlas_upload( texture_atlas_t * self )
         glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
                       0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
     }
+}
+
+void
+texture_atlas_render( texture_atlas_t * self,
+                      GLuint x, GLuint y,
+                      GLuint width, GLuint height )
+{
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    glEnable( GL_TEXTURE_2D );
+    glColor4f(0,0,0,1);
+    glBindTexture( GL_TEXTURE_2D, self->id );
+
+    glBegin(GL_QUADS);
+    glTexCoord2f( 0, 1 ); glVertex2i( 0, 0 );
+    glTexCoord2f( 0, 0 ); glVertex2i( 0, height );
+    glTexCoord2f( 1, 0 ); glVertex2i( width, height );
+    glTexCoord2f( 1, 1 ); glVertex2i( width, 0 );
+    glEnd();
 }
