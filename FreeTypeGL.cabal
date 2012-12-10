@@ -15,7 +15,7 @@ Cabal-version:       >=1.8
 Flag use_font_config
 -- problematic on windows
   Description: Build with fontconfig support
-  Default: True
+  Default: False
 
 Library
   -- Modules exported by the library.
