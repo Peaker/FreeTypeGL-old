@@ -40,15 +40,15 @@ Library
   Extra-libraries: GL, GLU
 
   if flag(use_font_config)
-    cc-options: -D USE_FONT_CONFIG
+    cc-options: -DUSE_FONT_CONFIG
   else
     cc-options:
 
   c-sources:
              src/edtaa3func.c
-             src/font-manager.c
              src/platform.c
              src/shader.c
+             src/font-desc.c
              src/text-buffer.c
              src/texture-atlas.c
              src/texture-font.c
