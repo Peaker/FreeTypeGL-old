@@ -3,7 +3,7 @@ module Graphics.Rendering.FreeTypeGL.Internal.Markup(Markup(..)) where
 
 import Control.Applicative ((<$>), (<*>))
 import Foreign (Ptr, plusPtr)
-import Foreign.C.Types (CFloat, CInt)
+import Foreign.C.Types (CInt)
 import Foreign.Storable (Storable(..))
 import Graphics.Rendering.OpenGL.GL (Color4(..))
 
@@ -19,9 +19,9 @@ pokeColor ptr (Color4 r g b a) = mapM_ p $ zip [0..] [r, g, b, a]
 
 
 data Markup = Markup
-  { rise :: CFloat
-  , spacing :: CFloat
-  , gamma :: CFloat
+  { rise :: Float
+  , spacing :: Float
+  , gamma :: Float
   , foreground_color :: Color4 Float
   , background_color :: Color4 Float
   , outline :: Maybe (Color4 Float)

@@ -1,6 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
 module Graphics.Rendering.FreeTypeGL.Internal.TextureFont
-  (TextureFont, new, Vector2(..), getSize
+  (TextureFont, new, Vector2(..), getTextSize
   ) where
 
 import Data.Tensor (Vector2(..))
@@ -19,8 +19,8 @@ foreign import ccall "texture_font_new"
 foreign import ccall "&texture_font_delete"
   c_texture_font_delete :: FunPtr (Ptr TextureFont -> IO ())
 
-foreign import ccall "texture_font_get_size"
-  c_texture_font_get_size :: Ptr TextureFont -> CWString -> CSize -> Ptr Float -> IO ()
+foreign import ccall "texture_font_get_text_size"
+  c_texture_font_get_text_size :: Ptr TextureFont -> CWString -> CSize -> Ptr Float -> IO ()
 
 foreign import ccall "strdup"
   c_strdup :: CString -> IO CString
@@ -33,11 +33,11 @@ new atlas filename size =
     newForeignPtr c_texture_font_delete =<<
       c_texture_font_new atlasPtr newFilenamePtr (realToFrac size)
 
-getSize :: ForeignPtr TextureFont -> String -> IO (Vector2 Float)
-getSize textureFont str =
+getTextSize :: ForeignPtr TextureFont -> String -> IO (Vector2 Float)
+getTextSize textureFont str =
   withCWStringLen str $ \(strPtr, len) ->
   withForeignPtr textureFont $ \fontPtr ->
   allocaArray 2 $ \sizePtr -> do
-    c_texture_font_get_size fontPtr strPtr (fromIntegral len) sizePtr
+    c_texture_font_get_text_size fontPtr strPtr (fromIntegral len) sizePtr
     [width, height] <- peekArray 2 sizePtr
     return $ Vector2 width height

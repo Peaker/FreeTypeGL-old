@@ -382,7 +382,7 @@ typedef struct
  * @param out_size Output parameter that will contain the size
  */
   void
-  texture_font_get_size(
+  texture_font_get_text_size(
       texture_font_t *self, wchar_t *text, size_t length, vec2 *out_size );
 
 /**

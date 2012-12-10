@@ -43,6 +43,7 @@ Library
 
   if flag(use_font_config)
     cc-options: -DUSE_FONT_CONFIG
+    Extra-libraries: fontconfig
   else
     cc-options:
 

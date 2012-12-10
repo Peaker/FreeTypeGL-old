@@ -1,9 +1,10 @@
 {-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
 module Graphics.Rendering.FreeTypeGL.Internal.TextBuffer
   ( TextBuffer, new, render, addText
-  , Pen, newPen, getPen
+  , Pen, newPen, getPen, Vector2(..)
   ) where
 
+import Data.Tensor (Vector2(..))
 import Foreign (FunPtr, Ptr)
 import Foreign.C.String (CWString, withCWStringLen)
 import Foreign.C.Types (CSize(..), CUInt(..))
@@ -32,18 +33,18 @@ foreign import ccall "&text_buffer_delete"
 
 newtype Pen = Pen (ForeignPtr Float)
 
-newPen :: Float -> Float -> IO Pen
-newPen x y = do
+newPen :: Vector2 Float -> IO Pen
+newPen (Vector2 x y) = do
   pen <- mallocForeignPtrArray 2
   withForeignPtr pen $ \penPtr ->
     pokeArray penPtr [x, y]
   return $ Pen pen
 
-getPen :: Pen -> IO (Float, Float)
+getPen :: Pen -> IO (Vector2 Float)
 getPen (Pen pen) =
   withForeignPtr pen $ \penPtr -> do
     [x, y] <- peekArray 2 penPtr
-    return (x, y)
+    return $ Vector2 x y
 
 new :: ForeignPtr Atlas -> Shader -> IO (ForeignPtr TextBuffer)
 new atlas shader =

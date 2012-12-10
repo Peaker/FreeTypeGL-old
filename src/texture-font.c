@@ -600,7 +600,7 @@ texture_font_get_glyph( texture_font_t * self,
 }
 
 void
-texture_font_get_size(
+texture_font_get_text_size(
     texture_font_t *self, wchar_t *text, size_t length,
     vec2 *out_size )
 {

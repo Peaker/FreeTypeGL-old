@@ -1,52 +1,82 @@
--- {-# LANGUAGE ForeignFunctionInterface #-}
--- -- | A higher-level interface wrapping the low-level C API
+{-# LANGUAGE ForeignFunctionInterface #-}
+-- | A higher-level interface wrapping the low-level C API
 
--- module Graphics.Rendering.FreeTypeGL
---   ( FontManager
---   , Font
---   , Markup(..)
---   , Vector2 (..)
---   , TextBuffer, textBufferSize, textBufferRender
---   ) where
+module Graphics.Rendering.FreeTypeGL
+  ( FontDesc(..), fontDescFindFileName
+  , Context, newContext
+  , Font, loadFont, textSize, Vector2(..)
+  , TextRenderer, Markup(..), textRenderer, renderText
+  ) where
 
--- import Data.Tensor (Vector2(..))
--- import Foreign (Ptr)
--- import Graphics.Rendering.FreeTypeGL.Internal.FontManager (FontManager)
--- import Graphics.Rendering.FreeTypeGL.Internal.Markup (Markup(..))
--- import qualified Graphics.Rendering.FreeTypeGL.Internal.FontManager as IFM
--- import qualified Graphics.Rendering.FreeTypeGL.Internal.TextBuffer as ITB
+import Control.Applicative ((<$>), (<*>))
+import Data.Tensor (Vector2(..))
+import Foreign.C.String (withCString)
+import Foreign.ForeignPtr (ForeignPtr)
+import Foreign.Marshal.Alloc (alloca)
+import Foreign.Storable (poke)
+import Graphics.Rendering.FreeTypeGL.Internal.Atlas (Atlas)
+import Graphics.Rendering.FreeTypeGL.Internal.Markup (Markup(..))
+import Graphics.Rendering.FreeTypeGL.Internal.Shader (Shader)
+import qualified Graphics.Rendering.FreeTypeGL.Internal.Atlas as Atlas
+import qualified Graphics.Rendering.FreeTypeGL.Internal.FontDesc as IFD
+import qualified Graphics.Rendering.FreeTypeGL.Internal.Shader as Shader
+import qualified Graphics.Rendering.FreeTypeGL.Internal.TextBuffer as ITB
+import qualified Graphics.Rendering.FreeTypeGL.Internal.TextureFont as ITF
 
--- -- | The FontManager serves as a cache to get fonts from with caching
--- -- data FontManager = FontManager { In
+data FontDesc = FontDesc
+  { fdFamily :: String
+  , fdSize :: Float
+  , fdBold :: Bool
+  , fdItalic :: Bool
+  }
 
--- -- We use the Markup record as POD description of the font we want,
--- -- and a (Ptr Markup) as an actualized font to use.
+fontDescFindFileName :: FontDesc -> IO String
+fontDescFindFileName (FontDesc family size bold italic) =
+  withCString family $ \familyPtr ->
+  IFD.fontDescFindFileName $ IFD.FontDesc familyPtr size bold italic
 
--- newtype Font = Font (Ptr Markup)
+data Context = Context
+  { _ctxAtlas :: ForeignPtr Atlas
+  , _ctxShader :: Shader
+  }
 
--- -- These defaults come from the C lib. Not sure about the depth=3...
--- newFontManager :: IO FontManager
--- newFontManager = IFM.new (512, 512) 3
+defaultAtlasSize :: Vector2 Int
+defaultAtlasSize = Vector2 512 512
 
--- -- loadFont :: FontManager -> Markup -> Font
--- -- loadFont = (fmap . fmap . fmap) Font IFM.loadFont
+defaultAtlasDepth :: Int
+defaultAtlasDepth = 3
 
--- type Size = Vector2 Float
--- type Pos = Vector2 Float
+-- TODO: Use Paths_module
+newContext :: IO Context
+newContext =
+  Context
+  <$> Atlas.new defaultAtlasSize defaultAtlasDepth
+  <*> Shader.load "src/shaders/text.vert" "src/shaders/text.frag"
 
--- data TextBuffer = TextBuffer
---   { _tbSize :: Size
---   , _tbBuf :: ITB.TextBuffer
---   }
+data Font = Font
+  { _fContext :: Context
+  , _fFont :: ForeignPtr ITF.TextureFont
+  }
 
--- textBufferSize :: TextBuffer -> Size
--- textBufferSize = _tbSize
+loadFont :: Context -> FilePath -> Float -> IO Font
+loadFont ctx@(Context atlas _) fileName size =
+  Font ctx <$> ITF.new atlas fileName size
 
--- textBufferRender :: TextBuffer -> IO ()
--- textBufferRender = ITB.render . _tbBuf
+textSize :: Font -> String -> IO (Vector2 Float)
+textSize (Font _ font) = ITF.getTextSize font
 
--- -- makeTextBuffer :: Font -> String -> IO TextBuffer
--- -- makeTextBuffer (Font markupPtr) str = do
--- --   textBuffer <- ITB.new
--- --   ITB.newPen
--- --   ITB.add textBuffer markupPtr undefined
+newtype TextRenderer = TextRenderer
+  { _tbBuffer :: ForeignPtr ITB.TextBuffer
+  }
+
+textRenderer :: Vector2 Float -> Markup -> Font -> String -> IO TextRenderer
+textRenderer pos markup (Font (Context atlas shader) font) str = do
+  pen <- ITB.newPen pos
+  textBuffer <- ITB.new atlas shader
+  alloca $ \markupPtr -> do
+    poke markupPtr markup
+    ITB.addText textBuffer markupPtr font pen str
+  return $ TextRenderer textBuffer
+
+renderText :: TextRenderer -> IO ()
+renderText (TextRenderer buf) = ITB.render buf

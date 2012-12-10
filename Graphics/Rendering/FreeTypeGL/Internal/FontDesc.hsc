@@ -8,13 +8,12 @@ import Foreign.Marshal.Alloc (alloca)
 import Foreign.Marshal.Error (throwIfNull)
 import Foreign.Storable (Storable (..))
 
-data FontDesc
-  = FontDesc
-    { fdFamily :: CString
-    , fdSize :: Float
-    , fdBold :: Bool
-    , fdItalic :: Bool
-    }
+data FontDesc = FontDesc
+  { fdFamily :: CString
+  , fdSize :: Float
+  , fdBold :: Bool
+  , fdItalic :: Bool
+  }
 
 #include "font-desc.h"
 #let alignment t = "%lu", (unsigned long)offsetof(struct {char x__; t (y__); }, y__)
