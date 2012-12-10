@@ -598,3 +598,30 @@ texture_font_get_glyph( texture_font_t * self,
     }
     return NULL;
 }
+
+void
+texture_font_get_size(
+    texture_font_t *self, wchar_t *text, size_t length,
+    vec2 *out_size )
+{
+    if( 0 == length ) length = wcslen(text);
+
+    float maxwidth = 0;
+    float width = 0;
+    unsigned lines = 1;
+    size_t i;
+    for( i=0; i<length; ++i ) {
+        if (text[i] == L'\n') {
+            if(width > maxwidth) maxwidth = width;
+            width = 0;
+            lines++;
+            continue;
+        }
+        texture_glyph_t *glyph =
+            texture_font_get_glyph( self, text[i] );
+        width += glyph->advance_x;
+    }
+    if(width > maxwidth) maxwidth = width;
+
+    *out_size = (vec2){{ maxwidth, lines * self->descender }};
+}

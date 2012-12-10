@@ -3,7 +3,6 @@ module Graphics.Rendering.FreeTypeGL.Internal.Markup(Markup(..)) where
 
 import Control.Applicative ((<$>), (<*>))
 import Foreign (Ptr, plusPtr)
-import Foreign.C.String (CString)
 import Foreign.C.Types (CFloat, CInt)
 import Foreign.Storable (Storable(..))
 import Graphics.Rendering.OpenGL.GL (Color4(..))
@@ -20,11 +19,7 @@ pokeColor ptr (Color4 r g b a) = mapM_ p $ zip [0..] [r, g, b, a]
 
 
 data Markup = Markup
-  { family :: CString
-  , size :: CFloat
-  , bold :: Bool
-  , italic :: Bool
-  , rise :: CFloat
+  { rise :: CFloat
   , spacing :: CFloat
   , gamma :: CFloat
   , foreground_color :: Color4 Float
@@ -47,14 +42,12 @@ underlinePtrs     = applyTuple ((#ptr markup_t, underline    ), (#ptr markup_t, 
 overlinePtrs      = applyTuple ((#ptr markup_t, overline     ), (#ptr markup_t, overline_color))
 strikethroughPtrs = applyTuple ((#ptr markup_t, strikethrough), (#ptr markup_t, strikethrough_color))
 
+#let alignment t = "%lu", (unsigned long)offsetof(struct {char x__; t (y__); }, y__)
+
 instance Storable Markup where
   sizeOf _    = #size markup_t
-  alignment _ = 4 -- #alignment markup_t
+  alignment _ = #alignment markup_t
   peek ptr = do
-    family' <- (#peek markup_t, family) ptr
-    size' <- (#peek markup_t, size) ptr
-    bold' <- toEnum . fromIntegral <$> ((#peek markup_t, bold) ptr :: IO CInt)
-    italic' <- toEnum . fromIntegral <$> ((#peek markup_t, italic) ptr :: IO CInt)
     rise' <- (#peek markup_t, rise) ptr
     spacing' <- (#peek markup_t, spacing) ptr
     gamma' <- (#peek markup_t, gamma) ptr
@@ -72,17 +65,13 @@ instance Storable Markup where
     overline' <- peekAnnotation overlinePtrs
     strikethrough' <- peekAnnotation strikethroughPtrs
     return $
-      Markup family' size' bold' italic' rise' spacing' gamma'
+      Markup rise' spacing' gamma'
       foreground_color' background_color'
       outline' underline' overline' strikethrough'
   poke ptr
-    (Markup family' size' bold' italic' rise' spacing' gamma'
+    (Markup rise' spacing' gamma'
       foreground_color' background_color'
       outline' underline' overline' strikethrough') = do
-    (#poke markup_t, family) ptr family'
-    (#poke markup_t, size) ptr size'
-    (#poke markup_t, bold) ptr (fromIntegral $ fromEnum bold' :: CInt)
-    (#poke markup_t, italic) ptr (fromIntegral $ fromEnum italic' :: CInt)
     (#poke markup_t, rise) ptr rise'
     (#poke markup_t, spacing) ptr spacing'
     (#poke markup_t, gamma) ptr gamma'

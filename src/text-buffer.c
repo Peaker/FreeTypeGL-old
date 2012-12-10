@@ -61,6 +61,7 @@ void
 text_buffer_delete( text_buffer_t *self )
 {
     vertex_buffer_delete(self->buffer);
+    free (self);
 }
 
 // ----------------------------------------------------------------------------
@@ -241,6 +242,12 @@ text_buffer_add_wchar( text_buffer_t * self,
                   gamma, black);
     }
 
+    // Actual glyph
+    add_glyph(&coors, pen, &markup->foreground_color,
+              glyph->offset_x, glyph->offset_y,
+              glyph->width, -(float)glyph->height,
+              gamma, glyph);
+
     /* Strikethrough */
     if( markup->strikethrough ) {
         add_glyph(&coors, pen, &markup->strikethrough_color,
@@ -248,12 +255,6 @@ text_buffer_add_wchar( text_buffer_t * self,
                   glyph->advance_x, font->underline_thickness,
                   gamma, black);
     }
-
-    // Actual glyph
-    add_glyph(&coors, pen, &markup->foreground_color,
-              glyph->offset_x, glyph->offset_y,
-              glyph->width, -(float)glyph->height,
-              gamma, glyph);
 
     coors_push_to_vector( &coors, self->buffer );
     pen->x += glyph->advance_x;

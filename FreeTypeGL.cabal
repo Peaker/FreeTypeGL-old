@@ -21,6 +21,8 @@ Library
   -- Modules exported by the library.
   Exposed-modules: Graphics.Rendering.FreeTypeGL,
                    Graphics.Rendering.FreeTypeGL.Internal.FontDesc,
+                   Graphics.Rendering.FreeTypeGL.Internal.Shader,
+                   Graphics.Rendering.FreeTypeGL.Internal.TextureFont,
                    Graphics.Rendering.FreeTypeGL.Internal.TextBuffer,
                    Graphics.Rendering.FreeTypeGL.Internal.Atlas,
                    Graphics.Rendering.FreeTypeGL.Internal.Markup

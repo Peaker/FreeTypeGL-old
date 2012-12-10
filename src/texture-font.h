@@ -374,6 +374,18 @@ typedef struct
                             const wchar_t * charcodes );
 
 /**
+ * Get the size of a piece of text with this font
+ *
+ * @param self   a valid texture font
+ * @param text   Text to get the size of
+ * @param length Length of text to be sized (or 0 for null termination)
+ * @param out_size Output parameter that will contain the size
+ */
+  void
+  texture_font_get_size(
+      texture_font_t *self, wchar_t *text, size_t length, vec2 *out_size );
+
+/**
  * Get the kerning between two horizontal glyphs.
  *
  * @param self      a valid texture glyph

@@ -216,19 +216,6 @@ typedef struct {
   void
   text_buffer_render( text_buffer_t * self );
 
-
- /**
-  * Print some text to the text buffer
-  *
-  * @param self a text buffer
-  * @param pen  position of text start
-  * @param ...  a series of markup_t *, wchar_t * ended by NULL
-  *
-  */
-  void
-  text_buffer_printf( text_buffer_t * self, vec2 * pen, ... );
-
-
  /**
   * Add some text to the text buffer
   *
@@ -236,21 +223,13 @@ typedef struct {
   * @param pen    position of text start
   * @param markup Markup to be used to add text
   * @param text   Text to be added
-  * @param length Length of text to be added
+  * @param length Length of text to be added (or 0 for null termination)
   */
   void
   text_buffer_add_text( text_buffer_t * self,
                         vec2 * pen, markup_t * markup,
                         texture_font_t * font,
                         wchar_t * text, size_t length );
-
-/**
-  * Clear text buffer
-  *
-  * @param self a text buffer
- */
-  void
-  text_buffer_clear( text_buffer_t * self );
 
 
 /** @} */
