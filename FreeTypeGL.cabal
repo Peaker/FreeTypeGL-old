@@ -9,6 +9,7 @@ Maintainer:          Eyal Lotem <eyal.lotem@gmail.com>
 Category:            Graphics
 Build-type:          Simple
 Extra-source-files:  src/*.c
+Data-files:          shaders/text.frag shaders/text.vert
 
 Cabal-version:       >=1.8
 
@@ -26,6 +27,7 @@ Library
                    Graphics.Rendering.FreeTypeGL.Internal.TextBuffer,
                    Graphics.Rendering.FreeTypeGL.Internal.Atlas,
                    Graphics.Rendering.FreeTypeGL.Internal.Markup
+  Other-modules:   Paths_FreeTypeGL
 
   -- Packages needed in order to build this package.
   -- "freetype2" and "OpenGL" deps are just for the C build side

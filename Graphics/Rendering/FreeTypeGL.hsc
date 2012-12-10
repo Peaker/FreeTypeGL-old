@@ -5,7 +5,8 @@ module Graphics.Rendering.FreeTypeGL
   ( FontDesc(..), fontDescFindFileName
   , Context, newContext
   , Font, loadFont, textSize, Vector2(..)
-  , TextRenderer, Markup(..), textRenderer, renderText
+  , Markup(..), noMarkup, Color4(..)
+  , TextRenderer, textRenderer, renderText
   ) where
 
 import Control.Applicative ((<$>), (<*>))
@@ -17,6 +18,9 @@ import Foreign.Storable (poke)
 import Graphics.Rendering.FreeTypeGL.Internal.Atlas (Atlas)
 import Graphics.Rendering.FreeTypeGL.Internal.Markup (Markup(..))
 import Graphics.Rendering.FreeTypeGL.Internal.Shader (Shader)
+import Graphics.Rendering.OpenGL.GL (Color4(..))
+import Paths_FreeTypeGL (getDataFileName)
+import System.IO.Unsafe (unsafePerformIO)  -- for pure textWidth
 import qualified Graphics.Rendering.FreeTypeGL.Internal.Atlas as Atlas
 import qualified Graphics.Rendering.FreeTypeGL.Internal.FontDesc as IFD
 import qualified Graphics.Rendering.FreeTypeGL.Internal.Shader as Shader
@@ -46,12 +50,15 @@ defaultAtlasSize = Vector2 512 512
 defaultAtlasDepth :: Int
 defaultAtlasDepth = 3
 
+
 -- TODO: Use Paths_module
 newContext :: IO Context
-newContext =
+newContext = do
+  textVert <- getDataFileName "shaders/text.vert"
+  textFrag <- getDataFileName "shaders/text.frag"
   Context
-  <$> Atlas.new defaultAtlasSize defaultAtlasDepth
-  <*> Shader.load "src/shaders/text.vert" "src/shaders/text.frag"
+    <$> Atlas.new defaultAtlasSize defaultAtlasDepth
+    <*> Shader.load textVert textFrag
 
 data Font = Font
   { _fContext :: Context
@@ -69,8 +76,21 @@ newtype TextRenderer = TextRenderer
   { _tbBuffer :: ForeignPtr ITB.TextBuffer
   }
 
-textRenderer :: Vector2 Float -> Markup -> Font -> String -> IO TextRenderer
-textRenderer pos markup (Font (Context atlas shader) font) str = do
+noMarkup :: Markup
+noMarkup = Markup
+  { rise = 0.0
+  , spacing = 0.0
+  , gamma = 1.0
+  , foreground_color = Color4 1 1 1 1
+  , background_color = Color4 0 0 0 0
+  , outline = Nothing
+  , underline = Nothing
+  , overline = Nothing
+  , strikethrough = Nothing
+  }
+
+textRenderer :: Vector2 Float -> Markup -> Font -> String -> TextRenderer
+textRenderer pos markup (Font (Context atlas shader) font) str = unsafePerformIO $ do
   pen <- ITB.newPen pos
   textBuffer <- ITB.new atlas shader
   alloca $ \markupPtr -> do

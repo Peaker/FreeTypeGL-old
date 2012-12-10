@@ -50,7 +50,7 @@ main = do
 
   context <- FGL.newContext
   font <- FGL.loadFont context ttfFilename 72.0
-  textRenderer <- FGL.textRenderer (GL.Vector2 100 100) markup font "Hello world"
+  let textRenderer = FGL.textRenderer (GL.Vector2 100 100) markup font "Hello world"
 
   forever $ do
     GL.clearColor $= GL.Color4 0.2 0 0 0
