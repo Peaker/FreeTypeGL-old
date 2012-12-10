@@ -190,10 +190,8 @@ texture_font_generate_kerning( texture_font_t *self )
     FT_Vector kerning;
 
     /* Load font */
-    if( !texture_font_load_face( &library, self->filename, self->size, &face ) )
-    {
-        return;
-    }
+    int res = texture_font_load_face( &library, self->filename, self->size, &face );
+    assert( res );
 
     /* For each glyph couple combination, check if kerning is necessary */
     /* Starts at index 1 since 0 is for the special backgroudn glyph */
@@ -234,6 +232,12 @@ texture_font_new( texture_atlas_t * atlas,
     assert( filename );
     assert( size );
 
+    /* Get font metrics at high resolution */
+    FT_Library library;
+    FT_Face face;
+    int res = texture_font_load_face( &library, filename, size*100, &face );
+    if(!res) return NULL;
+
     texture_font_t *self = (texture_font_t *) malloc( sizeof(texture_font_t) );
     assert (self);
     self->glyphs = vector_new( sizeof(texture_glyph_t *) );
@@ -254,14 +258,6 @@ texture_font_new( texture_atlas_t * atlas,
     self->lcd_weights[2] = 0x70;
     self->lcd_weights[3] = 0x40;
     self->lcd_weights[4] = 0x10;
-
-    /* Get font metrics at high resolution */
-    FT_Library library;
-    FT_Face face;
-    if( !texture_font_load_face( &library, self->filename, self->size*100, &face ) )
-    {
-        return self;
-    }
 
     // 64 * 64 because of 26.6 encoding AND the transform matrix used
     // in texture_font_load_face (hres = 64)
@@ -342,10 +338,8 @@ texture_font_load_glyphs( texture_font_t * self,
     height = self->atlas->height;
     depth  = self->atlas->depth;
 
-    if( !texture_font_load_face( &library, self->filename, self->size, &face ) )
-    {
-        return wcslen(charcodes);
-    }
+    int res = texture_font_load_face( &library, self->filename, self->size, &face );
+    assert( res );
 
     /* Load each glyph */
     for( i=0; i<wcslen(charcodes); ++i )
@@ -541,8 +535,6 @@ texture_font_get_glyph( texture_font_t * self,
     assert( self );
 
     size_t i;
-    wchar_t buffer[2] = {0,0};
-    texture_glyph_t *glyph;
 
     assert( self );
     assert( self->filename );
@@ -551,7 +543,8 @@ texture_font_get_glyph( texture_font_t * self,
     /* Check if charcode has been already loaded */
     for( i=0; i<self->glyphs->size; ++i )
     {
-        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
+        texture_glyph_t *glyph =
+            *(texture_glyph_t **) vector_get( self->glyphs, i );
         // If charcode is -1, we don't care about outline type or thickness
         if( (glyph->charcode == charcode) &&
             ((charcode == (wchar_t)(-1) ) ||
@@ -591,7 +584,7 @@ texture_font_get_glyph( texture_font_t * self,
     }
 
     /* Glyph has not been already loaded */
-    buffer[0] = charcode;
+    wchar_t buffer[2] = {charcode,0};
     if( texture_font_load_glyphs( self, buffer ) == 0 )
     {
         return *(texture_glyph_t **) vector_back( self->glyphs );
