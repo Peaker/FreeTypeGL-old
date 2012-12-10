@@ -1,1 +1,0 @@
-(cd demo ; gcc -o demo-$1 demo-$1.c `cat cccmdline` ) && demo/demo-$1

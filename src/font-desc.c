@@ -1,17 +1,17 @@
 #include "font-desc.h"
 
 #include <stdio.h>
-#if 0
+#ifdef USE_FONT_CONFIG
 #  if !defined(_WIN32) && !defined(_WIN64)
 #    include <fontconfig/fontconfig.h>
 #  endif
 #endif
 
 char *
-font_desc_find_filename( const font_desc_t * );
+font_desc_find_filename( const font_desc_t *desc )
 {
 // Use of fontconfig is disabled by default.
-#if 1
+#ifndef USE_FONT_CONFIG
     return NULL;
 #else
 #  if defined _WIN32 || defined _WIN64
@@ -21,11 +21,11 @@ font_desc_find_filename( const font_desc_t * );
     char *filename = 0;
     int weight = FC_WEIGHT_REGULAR;
     int slant = FC_SLANT_ROMAN;
-    if ( bold )
+    if ( desc->bold )
     {
         weight = FC_WEIGHT_BOLD;
     }
-    if( italic )
+    if( desc->italic )
     {
         slant = FC_SLANT_ITALIC;
     }
@@ -34,7 +34,7 @@ font_desc_find_filename( const font_desc_t * );
     FcPatternAddDouble( pattern, FC_SIZE, size );
     FcPatternAddInteger( pattern, FC_WEIGHT, weight );
     FcPatternAddInteger( pattern, FC_SLANT, slant );
-    FcPatternAddString( pattern, FC_FAMILY, (FcChar8*) family );
+    FcPatternAddString( pattern, FC_FAMILY, (FcChar8*) desc->family );
     FcConfigSubstitute( 0, pattern, FcMatchPattern );
     FcDefaultSubstitute( pattern );
     FcResult result;

@@ -1,0 +1,3 @@
+#!/bin/sh
+gcc -o demo-$1 demo-$1.c ../*.c -lGL -lGLU -lglut -I../ -I/home/eyal/.cabal/lib/freetype2-0.1.1/ghc-7.4.1/include /tmp/lib.o || exit 1
+./demo-$1

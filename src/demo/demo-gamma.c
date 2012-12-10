@@ -110,20 +110,24 @@ int main( int argc, char **argv )
     vertex_buffer_push_back( buffer, vertices, 8, indices, 12 );
 
 
-    text_buffer = text_buffer_new( LCD_FILTERING_ON );
+    texture_atlas_t *atlas = texture_atlas_new(512, 512, LCD_FILTERING_ON);
+    GLuint shader = shader_load("../shaders/text.vert", "../shaders/text.frag");
+    if((GLuint)-1 == shader) {
+        fprintf(stderr, "Can't load shader!\n");
+        return -1;
+    }
+    text_buffer = text_buffer_new(atlas, shader);
     vec4 white = {{1.0, 1.0, 1.0, 1.0}};
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
     markup_t markup = {
-        .family  = "fonts/Vera.ttf",
-        .size    = 15.0, .bold    = 0,   .italic  = 0,
         .rise    = 0.0,  .spacing = 0.0, .gamma   = 1.0,
         .foreground_color    = white, .background_color    = none,
         .underline           = 0,     .underline_color     = none,
         .overline            = 0,     .overline_color      = none,
         .strikethrough       = 0,     .strikethrough_color = none,
-        .font = 0,
     };
+    texture_font_t *font = texture_font_new(atlas, "../fonts/Vera.ttf", 15);
 
     size_t i;
     vec2 pen = {{32, 500}};
@@ -131,14 +135,14 @@ int main( int argc, char **argv )
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        text_buffer_add_text( text_buffer, &pen, &markup, text, wcslen(text) );
+        text_buffer_add_text( text_buffer, &pen, &markup, font, text, wcslen(text) );
     }
     pen = (vec2) {{32, 234}};
     markup.foreground_color = black;
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        text_buffer_add_text( text_buffer, &pen, &markup, text, wcslen(text) );
+        text_buffer_add_text( text_buffer, &pen, &markup, font, text, wcslen(text) );
     }
 
     glutMainLoop( );
