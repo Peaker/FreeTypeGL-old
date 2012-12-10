@@ -109,9 +109,9 @@ add_next_vertex( struct coordinates *coors, vec4 *color, float x, float y, float
     float a = color->a;
 
     glyph_vertex_t *gv = coors->cur_vertex;
-    assert (gv < coors->end_vertex);
     coors->cur_vertex++;
 
+    assert (gv < coors->end_vertex);
     gv->x=(int)x;
     gv->y=y;
     gv->z=0;
@@ -128,8 +128,9 @@ static GLuint *
 add_next_index( struct coordinates *coors )
 {
     GLuint *i = coors->cur_index;
-    assert (i < coors->end_index);
     coors->cur_index++;
+
+    assert (i < coors->end_index);
     return i;
 }
 
@@ -146,8 +147,8 @@ add_glyph( struct coordinates *coors,
     float x1 = ( x0 + x1_offset );
     float y1 = (int)( y0 + y1_offset );
     float s0 = glyph->s0;
-    float t0 = glyph->t0;
     float s1 = glyph->s1;
+    float t0 = glyph->t0;
     float t1 = glyph->t1;
     GLuint v0 = add_next_vertex (coors, color, x0, y0, s0, t0, gamma);
     GLuint v1 = add_next_vertex (coors, color, x0, y1, s0, t1, gamma);
@@ -251,7 +252,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     // Actual glyph
     add_glyph(&coors, pen, &markup->foreground_color,
               glyph->offset_x, glyph->offset_y,
-              glyph->width, -glyph->height,
+              glyph->width, -(float)glyph->height,
               gamma, glyph);
 
     coors_push_to_vector( &coors, self->buffer );
