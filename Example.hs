@@ -41,17 +41,18 @@ display textBuffer = do
 
 main :: IO ()
 main = do
-  [ttfFilename] <- getArgs
-  initScreen
-  atlas <- Atlas.new (512, 512) 3 -- depth
-  textBuffer <- TextBuffer.new atlas "src/shaders/text.vert" "src/shaders/text.frag"
-  font <- Atlas.loadFont atlas ttfFilename
-  pen <- TextBuffer.newPen
-  reshape
-  GLFW.setWindowCloseCallback $ error "Quit"
-  withForeignPtr pen $ \penPtr ->
-    pokeArray penPtr [32, 500]
-  TextBuffer.add textBuffer font pen "Hello world"
-  forever $ do
-    display textBuffer
-    GLFW.pollEvents
+  return ()
+  -- [ttfFilename] <- getArgs
+  -- initScreen
+  -- atlas <- Atlas.new (512, 512) 3 -- depth
+  -- textBuffer <- TextBuffer.new atlas "src/shaders/text.vert" "src/shaders/text.frag"
+  -- font <- Atlas.loadFont atlas ttfFilename
+  -- pen <- TextBuffer.newPen
+  -- reshape
+  -- GLFW.setWindowCloseCallback $ error "Quit"
+  -- withForeignPtr pen $ \penPtr ->
+  --   pokeArray penPtr [32, 500]
+  -- TextBuffer.add textBuffer font pen "Hello world"
+  -- forever $ do
+  --   display textBuffer
+  --   GLFW.pollEvents

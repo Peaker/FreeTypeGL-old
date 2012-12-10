@@ -12,10 +12,15 @@ Extra-source-files:  src/*.c
 
 Cabal-version:       >=1.8
 
+Flag use_font_config
+-- problematic on windows
+  Description: Build with fontconfig support
+  Default: True
+
 Library
   -- Modules exported by the library.
   Exposed-modules: Graphics.Rendering.FreeTypeGL,
-                   Graphics.Rendering.FreeTypeGL.Internal.FontManager,
+                   Graphics.Rendering.FreeTypeGL.Internal.FontDesc,
                    Graphics.Rendering.FreeTypeGL.Internal.TextBuffer,
                    Graphics.Rendering.FreeTypeGL.Internal.Atlas,
                    Graphics.Rendering.FreeTypeGL.Internal.Markup
@@ -34,10 +39,10 @@ Library
 
   Extra-libraries: GL, GLU
 
-  cc-options: -DFT_CONFIG_CONFIG_H=<ftconfig.h>
-              -DFT2_BUILD_LIBRARY
-              -DFT_CONFIG_MODULES_H=<ftmodule.h>
-              -DDARWIN_NO_CARBON
+  if flag(use_font_config)
+    cc-options: -D USE_FONT_CONFIG
+  else
+    cc-options:
 
   c-sources:
              src/edtaa3func.c
