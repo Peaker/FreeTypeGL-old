@@ -17,6 +17,7 @@ initScreen = do
     GLFW.displayOptions_width = resX,
     GLFW.displayOptions_height = resY
     }
+  FGL.initialize
 
   return ()
 
