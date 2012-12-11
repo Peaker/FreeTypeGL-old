@@ -70,15 +70,23 @@ Flag examples
   Description: Build example programs
   Default: False
 
-Executable FreeTypeGL-example
-
-  if flag(examples)
-    Buildable: True
-    Build-depends: base > 3 && < 5, FreeTypeGL, GLFW-b, OpenGL
+Executable hellobye
+  Main-is:       demos/hellobye.hs
+  if !flag(examples)
+    Buildable:     False
   else
-    Buildable: False
-  Main-is:       Example.hs
-  ghc-options: -Wall
+    Buildable:     True
+    Build-depends: base > 3 && < 5, FreeTypeGL, GLFW-b, OpenGL
+    ghc-options:   -Wall
+
+Executable atlasTexture
+  Main-is:       demos/atlasTexture.hs
+  if !flag(examples)
+    Buildable:     False
+  else
+    Buildable:     True
+    Build-depends: base > 3 && < 5, FreeTypeGL, GLFW-b, OpenGL
+    ghc-options:   -Wall
 
 source-repository head
   type: git
