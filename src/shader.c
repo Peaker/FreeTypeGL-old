@@ -125,3 +125,23 @@ shader_load( const char * vert_filename,
     }
     return handle;
 }
+
+
+
+#if defined(_WIN32) || defined(_WIN64)
+#include "opengl.h"
+
+int freetypegl_init() {
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+        return -1;
+    }
+    return 0;
+}
+
+#else
+
+int freetypegl_init() { return 0; }
+
+#endif

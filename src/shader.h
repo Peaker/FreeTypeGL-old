@@ -33,6 +33,8 @@
 #ifndef __SHADER_H__
 #define __SHADER_H__
 
+#include "opengl.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -98,6 +100,9 @@ extern "C" {
   GLuint
   shader_load( const char * vert_filename,
                const char * frag_filename );
+
+  /* 0 to indicate success: */
+  int freetypegl_init(void);
 
 /** @} */
 

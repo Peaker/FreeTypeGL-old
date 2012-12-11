@@ -103,7 +103,7 @@ textRenderer pos markup (Font (Context atlas shader) font) str = unsafePerformIO
 renderText :: TextRenderer -> IO ()
 renderText (TextRenderer buf) = ITB.render buf
 
-#include "init.h"
+#include "shader.h"
 
 foreign import ccall "freetypegl_init"
   c_freetypegl_init :: IO CInt

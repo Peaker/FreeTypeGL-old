@@ -7,6 +7,7 @@ License-file:        LICENSE
 Author:              Eyal Lotem <eyal.lotem@gmail.com>
 Maintainer:          Eyal Lotem <eyal.lotem@gmail.com>
 Category:            Graphics
+Build-type:          Simple
 Extra-source-files:  src/*.c
 Data-files:          shaders/text.frag shaders/text.vert
 
@@ -46,8 +47,7 @@ Library
   else
     cc-options:
 
-  c-sources: src/init.c
-             src/edtaa3func.c
+  c-sources: src/edtaa3func.c
              src/shader.c
              src/font-desc.c
              src/text-buffer.c
