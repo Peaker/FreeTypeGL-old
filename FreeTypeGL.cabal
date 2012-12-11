@@ -49,7 +49,6 @@ Library
 
   c-sources:
              src/edtaa3func.c
-             src/platform.c
              src/shader.c
              src/font-desc.c
              src/text-buffer.c
