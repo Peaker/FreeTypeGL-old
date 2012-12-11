@@ -62,9 +62,9 @@ Library
              src/vertex-attribute.c
              src/vertex-buffer.c
 
--- source-repository head
---   type: git
---   location: git://
+source-repository head
+  type: git
+  location: git://github.com/Peaker/FreeTypeGL.git
 
 Flag examples
   Description: Build example programs
@@ -87,7 +87,3 @@ Executable atlasTexture
     Buildable:     True
     Build-depends: base > 3 && < 5, FreeTypeGL, GLFW-b, OpenGL
     ghc-options:   -Wall
-
-source-repository head
-  type: git
-  location: git://github.com/Peaker/GL.git
