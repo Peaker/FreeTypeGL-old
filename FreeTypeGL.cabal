@@ -41,7 +41,7 @@ Library
   ghc-options: -Wall
   if os(windows)
     include-dirs: src windows/include src/windows/freetype
-    ld-options:   -g windows/glew32.lib windows/glew32s.lib windows/glew32mx.lib windows/glew32mxs.lib
+    ld-options:   -g windows/glew32s.lib windows/glew32mxs.lib
   else
     include-dirs: src
     ld-options:   -g
