@@ -315,8 +315,8 @@ texture_atlas_upload( texture_atlas_t * self )
 
 void
 texture_atlas_render( texture_atlas_t * self,
-                      GLuint x, GLuint y,
-                      GLuint width, GLuint height )
+                      float x, float y,
+                      float width, float height )
 {
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );

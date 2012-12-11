@@ -342,7 +342,7 @@ texture_font_load_glyphs( texture_font_t * self,
     assert( res );
 
     /* Load each glyph */
-    for( i=0; i<wcslen(charcodes); ++i )
+    for( i=0; charcodes[i] != 0; ++i )
     {
         glyph_index = FT_Get_Char_Index( face, charcodes[i] );
         // WARNING: We use texture-atlas depth to guess if user wants

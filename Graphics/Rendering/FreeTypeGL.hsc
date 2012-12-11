@@ -3,7 +3,7 @@
 
 module Graphics.Rendering.FreeTypeGL
   ( FontDesc(..), fontDescFindFileName
-  , Context, newContext
+  , Context, newContext, renderAtlas
   , Font, loadFont, textSize, Vector2(..)
   , Markup(..), noMarkup, Color4(..)
   , TextRenderer, textRenderer, renderText
@@ -61,6 +61,9 @@ newContext = do
   Context
     <$> Atlas.new defaultAtlasSize defaultAtlasDepth
     <*> Shader.load textVert textFrag
+
+renderAtlas :: Context -> Vector2 Float -> Vector2 Float -> IO ()
+renderAtlas (Context atlas _) pos size = Atlas.render atlas pos size
 
 data Font = Font
   { _fContext :: Context

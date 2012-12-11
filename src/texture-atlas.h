@@ -217,8 +217,8 @@ typedef struct
 
   void
   texture_atlas_render( texture_atlas_t * self,
-                        GLuint x, GLuint y,
-                        GLuint width, GLuint height );
+                        float x, float y,
+                        float width, float height );
 
 /** @} */
 
