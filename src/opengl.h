@@ -41,6 +41,7 @@
 #    include <OpenGL/gl.h>
 #  endif
 #elif defined(_WIN32) || defined(_WIN64)
+    #define GLEW_STATIC
     #include <GL/glew.h>
     //#include <HsOpenGL.h>       /* From Haskell Platform */
     //#include <GL/glext.h>

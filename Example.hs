@@ -13,9 +13,10 @@ resY = 600
 initScreen :: IO ()
 initScreen = do
   True <- GLFW.initialize
-  True <- GLFW.openWindow GLFW.defaultDisplayOptions {
-    GLFW.displayOptions_width = resX,
-    GLFW.displayOptions_height = resY
+  True <- GLFW.openWindow GLFW.defaultDisplayOptions
+    { GLFW.displayOptions_width = resX
+    , GLFW.displayOptions_height = resY
+    -- , GLFW.displayOptions_openGLProfile = GLFW.CompatibilityProfile
     }
   FGL.initialize
 

@@ -39,13 +39,18 @@ Library
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   Build-tools: hsc2hs
   ghc-options: -Wall
-  include-dirs: src windows/include src/windows/freetype
+  if os(windows)
+    include-dirs: src windows/include src/windows/freetype
+    ld-options:   -g windows/glew32.lib windows/glew32s.lib windows/glew32mx.lib windows/glew32mxs.lib
+  else
+    include-dirs: src
+    ld-options:   -g
 
   if flag(use_font_config)
-    cc-options: -DUSE_FONT_CONFIG
+    cc-options: -g -DUSE_FONT_CONFIG
     Extra-libraries: fontconfig
   else
-    cc-options:
+    cc-options: -g
 
   c-sources: src/edtaa3func.c
              src/shader.c
