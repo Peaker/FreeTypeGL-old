@@ -7,11 +7,14 @@ module Graphics.Rendering.FreeTypeGL
   , Font, loadFont, textSize, Vector2(..)
   , Markup(..), noMarkup, Color4(..)
   , TextRenderer, textRenderer, renderText
+  , initialize
   ) where
 
 import Control.Applicative ((<$>), (<*>))
 import Foreign.C.String (withCString)
+import Foreign.C.Types (CInt(..))
 import Foreign.ForeignPtr (ForeignPtr)
+import Foreign.Marshal.Error (throwIf_)
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Storable (poke)
 import Graphics.Rendering.FreeTypeGL.Internal.Atlas (Atlas)
@@ -99,3 +102,13 @@ textRenderer pos markup (Font (Context atlas shader) font) str = unsafePerformIO
 
 renderText :: TextRenderer -> IO ()
 renderText (TextRenderer buf) = ITB.render buf
+
+#include "init.h"
+
+foreign import ccall "freetypegl_init"
+  c_freetypegl_init :: IO CInt
+
+initialize :: IO ()
+initialize =
+  throwIf_ (/= 0) (("freetypegl_init returned" ++) . show) $
+  c_freetypegl_init

@@ -47,7 +47,7 @@ Library
   else
     cc-options:
 
-  c-sources:
+  c-sources: src/init.c
              src/edtaa3func.c
              src/shader.c
              src/font-desc.c
