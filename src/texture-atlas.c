@@ -221,9 +221,9 @@ texture_atlas_get_region( texture_atlas_t * self,
 
     {
         ivec3 node =
-            { .x = region.x
-            , .y = region.y + height
-            , .z = width };
+            { { region.x
+              , region.y + height
+              , width } };
         vector_insert( self->nodes, best_index, &node );
     }
 

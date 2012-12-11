@@ -39,7 +39,7 @@ Library
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   Build-tools: hsc2hs
   ghc-options: -Wall
-  include-dirs: src
+  include-dirs: src windows/include src/windows/freetype
 
   if flag(use_font_config)
     cc-options: -DUSE_FONT_CONFIG
