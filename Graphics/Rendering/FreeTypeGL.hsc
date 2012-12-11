@@ -97,13 +97,14 @@ noMarkup = Markup
   }
 
 textRenderer :: Vector2 Float -> Markup -> Font -> String -> TextRenderer
-textRenderer pos markup (Font (Context atlas shader) font) str = unsafePerformIO $ do
-  pen <- ITB.newPen pos
-  textBuffer <- ITB.new atlas shader
+textRenderer pos markup (Font (Context atlas shader) font) str = unsafePerformIO $
+  alloca $ \pen ->
   alloca $ \markupPtr -> do
+    poke pen pos
     poke markupPtr markup
+    textBuffer <- ITB.new atlas shader
     ITB.addText textBuffer markupPtr font pen str
-  return $ TextRenderer textBuffer
+    return $ TextRenderer textBuffer
 
 renderText :: TextRenderer -> IO ()
 renderText (TextRenderer buf) = ITB.render buf
