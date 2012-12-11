@@ -7,7 +7,6 @@ License-file:        LICENSE
 Author:              Eyal Lotem <eyal.lotem@gmail.com>
 Maintainer:          Eyal Lotem <eyal.lotem@gmail.com>
 Category:            Graphics
-Build-type:          Simple
 Extra-source-files:  src/*.c
 Data-files:          shaders/text.frag shaders/text.vert
 
