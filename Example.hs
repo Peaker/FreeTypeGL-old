@@ -47,17 +47,19 @@ main :: IO ()
 main = do
   [ttfFilename] <- getArgs
   initScreen
-  reshape
-  GLFW.setWindowCloseCallback $ error "Quit"
+  GLFW.setWindowCloseCallback $ fail "Quit"
 
   context <- FGL.newContext
   font <- FGL.loadFont context ttfFilename 72.0
-  let textRenderer = FGL.textRenderer (GL.Vector2 100 100) markup font "Hello world"
+  let hello = FGL.textRenderer (GL.Vector2 100 100) markup font "Hello world"
+      bye = FGL.textRenderer (GL.Vector2 100 200) FGL.noMarkup font "Bye world"
 
   forever $ do
+    reshape
     GL.clearColor $= GL.Color4 0.2 0 0 0
     GL.clear [GL.ColorBuffer, GL.DepthBuffer]
     GL.texture GL.Texture2D $= GL.Disabled
-    FGL.renderText textRenderer
+    FGL.renderText hello
+    FGL.renderText bye
     GLFW.swapBuffers
     GLFW.pollEvents
