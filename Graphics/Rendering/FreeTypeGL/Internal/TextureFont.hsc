@@ -1,10 +1,13 @@
 {-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
 module Graphics.Rendering.FreeTypeGL.Internal.TextureFont
-  (TextureFont, new, Vector2(..), getTextSize
+  ( TextureFont, new
+  , Vector2(..), getTextSize
+  , loadGlyphs
   ) where
 
+import Control.Applicative ((<$>))
 import Foreign (Ptr, FunPtr)
-import Foreign.C.String (CWString, withCWStringLen, CString, withCString)
+import Foreign.C.String (CWString, withCWString, withCWStringLen, CString, withCString)
 import Foreign.C.Types (CFloat(..), CSize(..))
 import Foreign.ForeignPtr (ForeignPtr, newForeignPtr, withForeignPtr)
 import Foreign.Marshal.Array (allocaArray, peekArray)
@@ -21,6 +24,9 @@ foreign import ccall "&texture_font_delete"
 
 foreign import ccall "texture_font_get_text_size"
   c_texture_font_get_text_size :: Ptr TextureFont -> CWString -> CSize -> Ptr Float -> IO ()
+
+foreign import ccall "texture_font_load_glyphs"
+  c_texture_font_load_glyphs :: Ptr TextureFont -> CWString -> IO CSize
 
 foreign import ccall "strdup"
   c_strdup :: CString -> IO CString
@@ -41,3 +47,11 @@ getTextSize textureFont str =
     c_texture_font_get_text_size fontPtr strPtr (fromIntegral len) sizePtr
     [width, height] <- peekArray 2 sizePtr
     return $ Vector2 width height
+
+-- | Returns how many glyphs failed to load
+loadGlyphs :: ForeignPtr TextureFont -> String -> IO Int
+loadGlyphs textureFont str =
+  withCWString str $ \strPtr ->
+  withForeignPtr textureFont $ \fontPtr ->
+  fromIntegral <$>
+  c_texture_font_load_glyphs fontPtr strPtr

@@ -71,8 +71,10 @@ data Font = Font
   }
 
 loadFont :: Context -> FilePath -> Float -> IO Font
-loadFont ctx@(Context atlas _) fileName size =
-  Font ctx <$> ITF.new atlas fileName size
+loadFont ctx@(Context atlas _) fileName size = do
+  textureFont <- ITF.new atlas fileName size
+  _ <- ITF.loadGlyphs textureFont $ ['A'..'Z'] ++ ['a'..'z']
+  return $ Font ctx textureFont
 
 textSize :: Font -> String -> IO (Vector2 Float)
 textSize (Font _ font) = ITF.getTextSize font
