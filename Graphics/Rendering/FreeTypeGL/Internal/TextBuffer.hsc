@@ -4,7 +4,6 @@ module Graphics.Rendering.FreeTypeGL.Internal.TextBuffer
   , Pen, newPen, getPen, Vector2(..)
   ) where
 
-import Data.Tensor (Vector2(..))
 import Foreign (FunPtr, Ptr)
 import Foreign.C.String (CWString, withCWStringLen)
 import Foreign.C.Types (CSize(..), CUInt(..))
@@ -14,6 +13,7 @@ import Graphics.Rendering.FreeTypeGL.Internal.Atlas (Atlas)
 import Graphics.Rendering.FreeTypeGL.Internal.Markup (Markup)
 import Graphics.Rendering.FreeTypeGL.Internal.Shader (Shader(..))
 import Graphics.Rendering.FreeTypeGL.Internal.TextureFont (TextureFont)
+import Graphics.Rendering.OpenGL.GL (Vector2(..))
 
 #include "text-buffer.h"
 

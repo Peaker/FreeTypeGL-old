@@ -10,7 +10,6 @@ module Graphics.Rendering.FreeTypeGL
   ) where
 
 import Control.Applicative ((<$>), (<*>))
-import Data.Tensor (Vector2(..))
 import Foreign.C.String (withCString)
 import Foreign.ForeignPtr (ForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
@@ -18,7 +17,7 @@ import Foreign.Storable (poke)
 import Graphics.Rendering.FreeTypeGL.Internal.Atlas (Atlas)
 import Graphics.Rendering.FreeTypeGL.Internal.Markup (Markup(..))
 import Graphics.Rendering.FreeTypeGL.Internal.Shader (Shader)
-import Graphics.Rendering.OpenGL.GL (Color4(..))
+import Graphics.Rendering.OpenGL.GL (Color4(..), Vector2(..))
 import Paths_FreeTypeGL (getDataFileName)
 import System.IO.Unsafe (unsafePerformIO)  -- for pure textWidth
 import qualified Graphics.Rendering.FreeTypeGL.Internal.Atlas as Atlas

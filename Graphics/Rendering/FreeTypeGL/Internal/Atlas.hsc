@@ -1,10 +1,10 @@
 {-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
 module Graphics.Rendering.FreeTypeGL.Internal.Atlas(Atlas, new, Vector2(..)) where
 
-import Data.Tensor (Vector2(..))
 import Foreign (Ptr, FunPtr)
 import Foreign.C.Types (CSize(..))
 import Foreign.ForeignPtr (ForeignPtr, newForeignPtr)
+import Graphics.Rendering.OpenGL.GL (Vector2(..))
 
 data Atlas
 

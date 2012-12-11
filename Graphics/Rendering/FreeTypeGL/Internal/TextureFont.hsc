@@ -3,13 +3,13 @@ module Graphics.Rendering.FreeTypeGL.Internal.TextureFont
   (TextureFont, new, Vector2(..), getTextSize
   ) where
 
-import Data.Tensor (Vector2(..))
 import Foreign (Ptr, FunPtr)
 import Foreign.C.String (CWString, withCWStringLen, CString, withCString)
 import Foreign.C.Types (CFloat(..), CSize(..))
 import Foreign.ForeignPtr (ForeignPtr, newForeignPtr, withForeignPtr)
 import Foreign.Marshal.Array (allocaArray, peekArray)
 import Graphics.Rendering.FreeTypeGL.Internal.Atlas (Atlas)
+import Graphics.Rendering.OpenGL.GL (Vector2(..))
 
 data TextureFont
 
