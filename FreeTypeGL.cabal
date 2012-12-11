@@ -41,8 +41,6 @@ Library
   ghc-options: -Wall
   include-dirs: src
 
-  Extra-libraries: GL, GLU
-
   if flag(use_font_config)
     cc-options: -DUSE_FONT_CONFIG
     Extra-libraries: fontconfig

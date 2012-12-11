@@ -83,7 +83,7 @@ vertex_buffer_new( const char *format )
 {
     size_t i, index = 0, stride = 0;
     const char *start = 0, *end = 0;
-    GLchar *pointer = 0;
+    char *pointer = 0;
 
     vertex_buffer_t *self = (vertex_buffer_t *) malloc (sizeof(vertex_buffer_t));
     if( !self )

@@ -206,7 +206,7 @@ typedef struct
     /**
      *  a translated client-side capability.
      */
-    GLchar ctarget;
+    unsigned char ctarget;
 
     /**
      * index of the generic vertex attribute to be modified.

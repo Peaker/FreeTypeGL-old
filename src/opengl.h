@@ -42,9 +42,9 @@
 //#    include <Glut/glut.h>
 #  endif
 #elif defined(_WIN32) || defined(_WIN64)
-    #include <Windows.h>
-    #include <GL/glew.h>
-    #include <GL/wglew.h>
+    #include <HsOpenGL.h>       /* From Haskell Platform */
+//    #include <GL/glew.h>
+//    #include <GL/wglew.h>
 //    #include <GLUT/glut.h> // changed according to your path of glut.h
 #else
     #define GL_GLEXT_PROTOTYPES

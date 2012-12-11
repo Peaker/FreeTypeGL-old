@@ -55,7 +55,7 @@ vertex_t;
 vertex_buffer_t * lines;
 GLuint program = 0;
 
-const char *vertex_shader_source = 
+const char *vertex_shader_source =
     "attribute float thickness;                                        "
     "varying float t;                                                  "
     "void main()                                                       "
@@ -66,7 +66,7 @@ const char *vertex_shader_source =
     "    t = thickness;                                                "
     "}                                                                 ";
 
-const char *fragment_shader_source = 
+const char *fragment_shader_source =
     "varying float t;                                                  "
     "void main()                                                       "
     "{                                                                 "
@@ -128,7 +128,7 @@ build_shader( const char* source, GLenum type )
     glGetShaderiv( handle, GL_COMPILE_STATUS, &compile_status );
     if( compile_status == GL_FALSE )
     {
-        GLchar messages[256];
+        char messages[256];
         glGetShaderInfoLog( handle, sizeof(messages), 0, &messages[0] );
         fprintf( stderr, "%s\n", messages );
         exit( EXIT_FAILURE );
@@ -144,22 +144,22 @@ build_program( const char * vertex_source,
 {
     GLuint vertex_shader   = build_shader( vertex_source, GL_VERTEX_SHADER);
     GLuint fragment_shader = build_shader( fragment_source, GL_FRAGMENT_SHADER);
-    
+
     GLuint handle = glCreateProgram( );
     glAttachShader( handle, vertex_shader);
     glAttachShader( handle, fragment_shader);
     glLinkProgram( handle);
-    
+
     GLint link_status;
     glGetProgramiv( handle, GL_LINK_STATUS, &link_status );
     if (link_status == GL_FALSE)
     {
-        GLchar messages[256];
+        char messages[256];
         glGetProgramInfoLog( handle, sizeof(messages), 0, &messages[0] );
         fprintf( stderr, "%s\n", messages );
         exit(1);
     }
-    
+
     return handle;
 }
 
@@ -229,7 +229,7 @@ void make_segment( vertex_buffer_t * buffer,
     vertex_t cap1[6] = { {x1-dy,    y1+dx,     0,-1, r,g,b,a, t},
                          {x1+dy,    y1-dx,     0,+1, r,g,b,a, t},
                          {x1+dy+dx, y1-dx+dy, +1,+1, r,g,b,a, t},
-                         
+
                          {x1-dy,    y1+dx,     0,-1, r,g,b,a, t},
                          {x1+dy+dx, y1-dx+dy, +1,+1, r,g,b,a, t},
                          {x1-dy+dx, y1+dx+dy, +1,-1, r,g,b,a, t} };
@@ -242,7 +242,7 @@ void make_segment( vertex_buffer_t * buffer,
 void init( void )
 {
     glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
-    glDisable( GL_DEPTH_TEST ); 
+    glDisable( GL_DEPTH_TEST );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 

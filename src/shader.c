@@ -80,7 +80,7 @@ shader_compile( const char* source,
     glGetShaderiv( handle, GL_COMPILE_STATUS, &compile_status );
     if(GL_FALSE == compile_status)
     {
-        GLchar messages[256];
+        char messages[256];
         glGetShaderInfoLog( handle, sizeof messages, 0, messages );
         fprintf( stderr, "%s\n", messages );
         return (GLuint)-1;
@@ -118,7 +118,7 @@ shader_load( const char * vert_filename,
     glGetProgramiv( handle, GL_LINK_STATUS, &link_status );
     if (link_status == GL_FALSE)
     {
-        GLchar messages[256];
+        char messages[256];
         glGetProgramInfoLog( handle, sizeof(messages), 0, &messages[0] );
         fprintf( stderr, "%s\n", messages );
         return (GLuint)-1;
