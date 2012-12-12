@@ -75,7 +75,7 @@ texture_glyph_t *texture_glyph_new( void )
     texture_glyph_t *self = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
     assert (self);
     self->size = (ivec2){{ 0, 0 }};
-    self->outline_type = 0;
+    self->outline_type = TEXTURE_OUTLINE_NONE;
     self->outline_thickness = 0.0;
     self->bearing = (ivec2){{ 0, 0 }};
     self->advance = (vec2){{ 0, 0 }};
@@ -210,7 +210,7 @@ texture_font_t *texture_font_new(
     self->height = 0;
     self->ascender = 0;
     self->descender = 0;
-    self->outline_type = 0;
+    self->outline_type = TEXTURE_OUTLINE_NONE;
     self->outline_thickness = 0.0;
     self->hinting = 1;
     self->filtering = 1;
@@ -305,7 +305,7 @@ texture_font_load_glyphs( texture_font_t * self,
         //          LCD subpixel rendering
         FT_Int32 flags = 0;
 
-        if( self->outline_type > 0 ) {
+        if( self->outline_type != TEXTURE_OUTLINE_NONE ) {
             flags |= FT_LOAD_NO_BITMAP;
         } else {
             flags |= FT_LOAD_RENDER;
@@ -327,7 +327,7 @@ texture_font_load_glyphs( texture_font_t * self,
         int ft_bitmap_rows = 0;
         int ft_glyph_top = 0;
         int ft_glyph_left = 0;
-        if( 0 == self->outline_type ) {
+        if( TEXTURE_OUTLINE_NONE == self->outline_type ) {
             FT_GlyphSlot slot = self->face->glyph;
             ft_bitmap       = slot->bitmap;
             ft_bitmap_width = slot->bitmap.width;
@@ -345,13 +345,13 @@ texture_font_load_glyphs( texture_font_t * self,
             FT_CHECK_CALL(FT_Get_Glyph, ( self->face->glyph, &ft_glyph), Error);
 
             switch(self->outline_type) {
-            case 1:
+            case TEXTURE_OUTLINE_LINE:
                 FT_CHECK_CALL(FT_Glyph_Stroke, ( &ft_glyph, stroker, 1 ), Error);
                 break;
-            case 2:
+            case TEXTURE_OUTLINE_INNER:
                 FT_CHECK_CALL(FT_Glyph_StrokeBorder, ( &ft_glyph, stroker, 0, 1 ), Error);
                 break;
-            case 3:
+            case TEXTURE_OUTLINE_OUTER:
                 FT_CHECK_CALL(FT_Glyph_StrokeBorder, ( &ft_glyph, stroker, 1, 1 ), Error);
                 break;
             }
@@ -396,7 +396,7 @@ texture_font_load_glyphs( texture_font_t * self,
         vector_push_back( self->glyphs, &glyph );
         pushed++;
 
-        if(self->outline_type > 0) {
+        if(self->outline_type != TEXTURE_OUTLINE_NONE) {
             FT_Done_Glyph( ft_glyph );
         }
     }

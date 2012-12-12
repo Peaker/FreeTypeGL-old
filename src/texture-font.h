@@ -124,6 +124,13 @@ typedef struct
  *              |------------- advance_x ---------->|
  */
 
+enum texture_outline_type {
+    TEXTURE_OUTLINE_NONE = 0,
+    TEXTURE_OUTLINE_LINE = 1,
+    TEXTURE_OUTLINE_INNER = 2,
+    TEXTURE_OUTLINE_OUTER = 3,
+};
+
 typedef struct {
     wchar_t charcode;
     ivec2 size;
@@ -144,10 +151,7 @@ typedef struct {
      */
     vector_t * kerning;
 
-    /**
-     * Glyph outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
-     */
-    int outline_type;
+    enum texture_outline_type outline_type;
     float outline_thickness;
 
 } texture_glyph_t;
@@ -178,10 +182,7 @@ typedef struct
      */
     int hinting;
 
-    /**
-     * Outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
-     */
-    int outline_type;
+    enum texture_outline_type outline_type;
 
     /**
      * Outline thickness
