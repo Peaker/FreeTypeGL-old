@@ -224,8 +224,10 @@ typedef struct {
   * @param markup Markup to be used to add text
   * @param text   Text to be added
   * @param length Length of text to be added (or 0 for null termination)
+  *
+  * @return 0 for success.
   */
-  void
+  int
   text_buffer_add_text( text_buffer_t * self,
                         vec2 * pen, markup_t * markup,
                         texture_font_t * font,

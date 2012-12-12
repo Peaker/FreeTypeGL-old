@@ -134,14 +134,16 @@ int main( int argc, char **argv )
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        text_buffer_add_text( text_buffer, &pen, &markup, font, text, wcslen(text) );
+        int rc = text_buffer_add_text( text_buffer, &pen, &markup, font, text, wcslen(text) );
+        assert(0 == rc);
     }
     pen = (vec2) {{32, 234}};
     markup.foreground_color = black;
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        text_buffer_add_text( text_buffer, &pen, &markup, font, text, wcslen(text) );
+        int rc = text_buffer_add_text( text_buffer, &pen, &markup, font, text, wcslen(text) );
+        assert(0 == rc);
     }
 
     glutMainLoop( );

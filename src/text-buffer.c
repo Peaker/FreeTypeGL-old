@@ -174,7 +174,7 @@ coors_push_to_vector( struct coordinates *coors, vertex_buffer_t * buffer )
         coors->cur_index - coors->start_index );
 }
 
-static void
+static int
 text_buffer_add_wchar( text_buffer_t * self,
                        vec2 * pen, markup_t * markup,
                        texture_font_t * font,
@@ -204,7 +204,7 @@ text_buffer_add_wchar( text_buffer_t * self,
         self->line_descender = 0;
         self->line_ascender = 0;
         self->line_start = vector_size( self->buffer->items );
-        return;
+        return 0;
     }
 
     texture_glyph_t *glyph = texture_font_get_glyph( font, current );
@@ -212,7 +212,7 @@ text_buffer_add_wchar( text_buffer_t * self,
 
     if( glyph == NULL )
     {
-        return;
+        return -1;
     }
 
     float kerning = previous ? texture_glyph_get_kerning( glyph, previous ) : 0;
@@ -258,10 +258,11 @@ text_buffer_add_wchar( text_buffer_t * self,
 
     coors_push_to_vector( &coors, self->buffer );
     pen->x += glyph->advance_x;
+    return 0;
 }
 
 // ----------------------------------------------------------------------------
-void
+int
 text_buffer_add_text( text_buffer_t * self,
                       vec2 * pen, markup_t * markup,
                       texture_font_t * font,
@@ -293,10 +294,16 @@ text_buffer_add_text( text_buffer_t * self,
         self->line_descender = font->descender;
     }
 
-    text_buffer_add_wchar( self, pen, markup, font, text[0], 0 );
+    int rc;
+    if(0 != (rc = text_buffer_add_wchar( self, pen, markup, font, text[0], 0 ))) {
+        return rc;
+    }
 
     size_t i;
     for( i=1; i<length; ++i ) {
-        text_buffer_add_wchar( self, pen, markup, font, text[i], text[i-1] );
+        if(0 != (rc = text_buffer_add_wchar( self, pen, markup, font, text[i], text[i-1] ))) {
+            return rc;
+        }
     }
+    return 0;
 }

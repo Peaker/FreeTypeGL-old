@@ -129,7 +129,8 @@ int main( int argc, char **argv )
     wchar_t *text = L"| A Quick Brown Fox Jumps Over The Lazy Dog\n";
     for( i=0; i < 30; ++i)
     {
-        text_buffer_add_text( text_buffer, &pen, &markup, text, wcslen(text) );
+        int rc = text_buffer_add_text( text_buffer, &pen, &markup, text, wcslen(text) );
+        assert(0 == rc);
         pen.x += i*0.1;
     }
 

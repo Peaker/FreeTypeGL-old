@@ -51,7 +51,7 @@ data Context = Context
   }
 
 defaultAtlasSize :: Vector2 Int
-defaultAtlasSize = Vector2 2048 2048
+defaultAtlasSize = Vector2 2048 4096
 
 defaultAtlasDepth :: Int
 defaultAtlasDepth = 3
@@ -77,7 +77,7 @@ data Font = Font
 loadFont :: Context -> FilePath -> Float -> IO Font
 loadFont ctx@(Context atlas _) fileName size = do
   textureFont <- ITF.new atlas fileName size
-  _ <- ITF.loadGlyphs textureFont $ ['A'..'Z'] ++ ['a'..'z']
+  _ <- ITF.loadGlyphs textureFont $ ['A']
   return $ Font ctx textureFont
 
 textSize :: Font -> String -> IO (Vector2 Float)
