@@ -469,8 +469,7 @@ texture_font_get_glyph( texture_font_t * self,
     return *glyphs;
 }
 
-void
-texture_font_get_text_size(
+void texture_font_get_text_size(
     texture_font_t *self, wchar_t *text, size_t length,
     vec2 *out_size )
 {
@@ -493,5 +492,5 @@ texture_font_get_text_size(
     }
     if(width > maxwidth) maxwidth = width;
 
-    *out_size = (vec2){{ maxwidth, lines * self->descender }};
+    *out_size = (vec2){{ maxwidth, lines * self->height }};
 }
