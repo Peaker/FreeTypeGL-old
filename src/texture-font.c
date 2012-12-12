@@ -262,14 +262,14 @@ texture_font_new( texture_atlas_t * atlas,
     // 64 * 64 because of 26.6 encoding AND the transform matrix used
     // in texture_font_load_face (hres = 64)
     self->underline_position = face->underline_position / (float)(64.0f*64.0f) * self->size;
-    self->underline_position = round( self->underline_position );
+    self->underline_position = floor( 0.5 + self->underline_position );
     if( self->underline_position > -2 )
     {
         self->underline_position = -2.0;
     }
 
     self->underline_thickness = face->underline_thickness / (float)(64.0f*64.0f) * self->size;
-    self->underline_thickness = round( self->underline_thickness );
+    self->underline_thickness = floor( 0.5 + self->underline_thickness );
     if( self->underline_thickness < 1 )
     {
         self->underline_thickness = 1.0;
