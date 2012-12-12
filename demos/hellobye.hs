@@ -10,7 +10,7 @@ resX, resY :: Num a => a
 resX = 800
 resY = 600
 
-initScreen :: IO FGL.FreeTypeGL
+initScreen :: IO ()
 initScreen = do
   True <- GLFW.initialize
   True <- GLFW.openWindow GLFW.defaultDisplayOptions
@@ -18,7 +18,7 @@ initScreen = do
     , GLFW.displayOptions_height = resY
     -- , GLFW.displayOptions_openGLProfile = GLFW.CompatibilityProfile
     }
-  FGL.initialize
+  return ()
 
 reshape :: IO ()
 reshape = do
@@ -44,11 +44,12 @@ markup = FGL.Markup
 main :: IO ()
 main = do
   [ttfFilename] <- getArgs
-  fgl <- initScreen
+  initScreen
   GLFW.setWindowCloseCallback $ fail "Quit"
 
-  context <- FGL.newContext fgl
-  font <- FGL.loadFont context ttfFilename 72.0
+  atlas <- FGL.newAtlas FGL.defaultAtlasNewParams
+  shader <- FGL.newShader
+  font <- FGL.loadFont atlas shader ttfFilename 72.0
   let hello = FGL.textRenderer (GL.Vector2 100 100) markup font "Hello world"
       bye = FGL.textRenderer (GL.Vector2 100 200) FGL.noMarkup font "Bye world"
 

@@ -1,5 +1,5 @@
 {-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
-module Graphics.Rendering.FreeTypeGL.Internal.Markup(Markup(..)) where
+module Graphics.Rendering.FreeTypeGL.Internal.Markup(Markup(..), noMarkup) where
 
 import Control.Applicative ((<$>), (<*>))
 import Foreign (Ptr, plusPtr)
@@ -28,6 +28,19 @@ data Markup = Markup
   , underline :: Maybe (Color4 Float)
   , overline :: Maybe (Color4 Float)
   , strikethrough :: Maybe (Color4 Float)
+  }
+
+noMarkup :: Markup
+noMarkup = Markup
+  { rise = 0.0
+  , spacing = 0.0
+  , gamma = 1.0
+  , foreground_color = Color4 1 1 1 1
+  , background_color = Color4 0 0 0 0
+  , outline = Nothing
+  , underline = Nothing
+  , overline = Nothing
+  , strikethrough = Nothing
   }
 
 #include "markup.h"
