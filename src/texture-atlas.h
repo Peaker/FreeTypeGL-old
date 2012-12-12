@@ -78,10 +78,7 @@ extern "C" {
  * texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
  *
  * // Allocates a region of 20x20
- * ivec4 region = texture_atlas_get_region( atlas, 20, 20 );
- *
- * // Fill region with some data
- * texture_atlas_set_region( atlas, region.x, region.y, region.width, region.height, data, stride )
+ * ivec4 region = texture_atlas_make_region( atlas, 20, 20, data, stride );
  *
  * ...
  *
@@ -176,35 +173,16 @@ typedef struct
  *  @param self   a texture atlas structure
  *  @param width  width of the region to allocate
  *  @param height height of the region to allocate
+ *  @param data   data to be uploaded into the specified region
+ *  @param stride stride of the data
  *  @return       Coordinates of the allocated region
  *
  */
   ivec4
-  texture_atlas_get_region( texture_atlas_t * self,
-                            const size_t width,
-                            const size_t height );
-
-
-/**
- *  Upload data to the specified atlas region.
- *
- *  @param self   a texture atlas structure
- *  @param x      x coordinate the region
- *  @param y      y coordinate the region
- *  @param width  width of the region
- *  @param height height of the region
- *  @param data   data to be uploaded into the specified region
- *  @param stride stride of the data
- *
- */
-  void
-  texture_atlas_set_region( texture_atlas_t * self,
-                            const size_t x,
-                            const size_t y,
-                            const size_t width,
-                            const size_t height,
-                            const unsigned char *data,
-                            const size_t stride );
+  texture_atlas_make_region(
+      texture_atlas_t *, size_t width, size_t height,
+      const unsigned char *data,
+      size_t stride);
 
 /**
  *  Remove all allocated regions from the atlas.

@@ -297,23 +297,16 @@ texture_font_load_glyphs( texture_font_t * self,
     assert( self );
     assert( charcodes );
 
-    size_t i, x, y, width, height, depth, w, h;
-    FT_Glyph ft_glyph;
-    FT_GlyphSlot slot;
-    FT_Bitmap ft_bitmap;
-
-    FT_UInt glyph_index;
-    texture_glyph_t *glyph;
-    ivec4 region;
     size_t missed = 0, pushed = 0;
-    width  = self->atlas->width;
-    height = self->atlas->height;
-    depth  = self->atlas->depth;
+    size_t width  = self->atlas->width;
+    size_t height = self->atlas->height;
+    size_t depth  = self->atlas->depth;
 
     /* Load each glyph */
+    size_t i;
     for( i=0; charcodes[i] != 0; ++i )
     {
-        glyph_index = FT_Get_Char_Index( self->face, charcodes[i] );
+        FT_UInt glyph_index = FT_Get_Char_Index( self->face, charcodes[i] );
         // WARNING: We use texture-atlas depth to guess if user wants
         //          LCD subpixel rendering
         FT_Int32 flags = 0;
@@ -334,17 +327,17 @@ texture_font_load_glyphs( texture_font_t * self,
         }
         FT_CHECK_CALL(FT_Load_Glyph, ( self->face, glyph_index, flags ), Error);
 
+        FT_Glyph ft_glyph;
+        FT_Bitmap ft_bitmap;
         int ft_bitmap_width = 0;
         int ft_bitmap_rows = 0;
-        /* int ft_bitmap_pitch = 0; */
         int ft_glyph_top = 0;
         int ft_glyph_left = 0;
         if( 0 == self->outline_type ) {
-            slot            = self->face->glyph;
+            FT_GlyphSlot slot = self->face->glyph;
             ft_bitmap       = slot->bitmap;
             ft_bitmap_width = slot->bitmap.width;
             ft_bitmap_rows  = slot->bitmap.rows;
-            /* ft_bitmap_pitch = slot->bitmap.pitch; */
             ft_glyph_top    = slot->bitmap_top;
             ft_glyph_left   = slot->bitmap_left;
         } else {
@@ -375,54 +368,45 @@ texture_font_load_glyphs( texture_font_t * self,
             ft_bitmap       = ft_bitmap_glyph->bitmap;
             ft_bitmap_width = ft_bitmap.width;
             ft_bitmap_rows  = ft_bitmap.rows;
-            /* ft_bitmap_pitch = ft_bitmap.pitch; */
             ft_glyph_top    = ft_bitmap_glyph->top;
             ft_glyph_left   = ft_bitmap_glyph->left;
             FT_Stroker_Done(stroker);
         }
 
+        size_t w = ft_bitmap_width/depth;
+        size_t h = ft_bitmap_rows;
 
-        // We want each glyph to be separated by at least one black pixel
-        // (for example for shader used in demo-subpixel.c)
-        w = ft_bitmap_width/depth + 1;
-        h = ft_bitmap_rows + 1;
-        region = texture_atlas_get_region( self->atlas, w, h );
-        if ( region.x < 0 )
-        {
+        ivec4 region = texture_atlas_make_region(
+            self->atlas, w, h, ft_bitmap.buffer, ft_bitmap.pitch);
+        if(region.x < 0) {
             missed++;
             fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
             continue;
         }
-        w = w - 1;
-        h = h - 1;
-        x = region.x;
-        y = region.y;
-        texture_atlas_set_region( self->atlas, x, y, w, h,
-                                  ft_bitmap.buffer, ft_bitmap.pitch );
 
-        glyph = texture_glyph_new( );
+        texture_glyph_t *glyph = texture_glyph_new();
         glyph->charcode = charcodes[i];
-        glyph->width    = w;
-        glyph->height   = h;
+        glyph->width    = region.width;
+        glyph->height   = region.height;
         glyph->outline_type = self->outline_type;
         glyph->outline_thickness = self->outline_thickness;
         glyph->offset_x = ft_glyph_left;
         glyph->offset_y = ft_glyph_top;
-        glyph->s0       = x/(float)width;
-        glyph->t0       = y/(float)height;
-        glyph->s1       = (x + glyph->width)/(float)width;
-        glyph->t1       = (y + glyph->height)/(float)height;
+        glyph->s0       = region.x/(float)width;
+        glyph->t0       = region.y/(float)height;
+        glyph->s1       = (region.x + region.width)/(float)width;
+        glyph->t1       = (region.y + region.height)/(float)height;
 
         // Discard hinting to get advance
         FT_CHECK_CALL(FT_Load_Glyph, ( self->face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING), Error);
-        slot = self->face->glyph;
+        FT_GlyphSlot slot = self->face->glyph;
         glyph->advance_x = slot->advance.x/64.0;
         glyph->advance_y = slot->advance.y/64.0;
 
         vector_push_back( self->glyphs, &glyph );
         pushed++;
 
-        if( self->outline_type > 0 ) {
+        if(self->outline_type > 0) {
             FT_Done_Glyph( ft_glyph );
         }
     }
@@ -469,21 +453,19 @@ texture_font_get_glyph( texture_font_t * self,
      */
     if( charcode == (wchar_t)(-1) )
     {
-        size_t width  = self->atlas->width;
-        size_t height = self->atlas->height;
-        ivec4 region = texture_atlas_get_region( self->atlas, 5, 5 );
-        texture_glyph_t * glyph = texture_glyph_new( );
         static unsigned char data[4*4*3] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                                             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                                             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                                             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-        if ( region.x < 0 )
-        {
+        ivec4 region = texture_atlas_make_region(self->atlas, 4, 4, data, 0);
+        if (region.x < 0) {
             fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
             return NULL;
         }
-        texture_atlas_set_region( self->atlas, region.x, region.y, 4, 4, data, 0 );
+        texture_glyph_t * glyph = texture_glyph_new();
         glyph->charcode = (wchar_t)(-1);
+        size_t width  = self->atlas->width;
+        size_t height = self->atlas->height;
         glyph->s0 = (region.x+2)/(float)width;
         glyph->t0 = (region.y+2)/(float)height;
         glyph->s1 = (region.x+3)/(float)width;

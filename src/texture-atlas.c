@@ -88,31 +88,26 @@ texture_atlas_delete( texture_atlas_t *self )
 }
 
 
-// ----------------------------------------------- texture_atlas_set_region ---
-void
-texture_atlas_set_region( texture_atlas_t * self,
-                          const size_t x,
-                          const size_t y,
-                          const size_t width,
-                          const size_t height,
-                          const unsigned char * data,
-                          const size_t stride )
+static void set_region(
+    texture_atlas_t * self,
+    ivec4 region,
+    const unsigned char * data,
+    size_t stride )
 {
-    assert( self );
-    assert( x > 0);
-    assert( y > 0);
-    assert( x < (self->width-1));
-    assert( (x + width) <= (self->width-1));
-    assert( y < (self->height-1));
-    assert( (y + height) <= (self->height-1));
+    assert(self);
+    assert(region.x > 0);
+    assert(region.y > 0);
+    assert(region.x + region.width < self->width);
+    assert(region.y + region.height < self->height);
+
+    if(!region.width) return;
 
     size_t i;
     size_t depth = self->depth;
     size_t charsize = sizeof(char);
-    for( i=0; i<height; ++i )
-    {
-        memcpy( self->data+((y+i)*self->width + x ) * charsize * depth,
-                data + (i*stride) * charsize, width * charsize * depth  );
+    for(i=0; i<region.height; ++i) {
+        memcpy( self->data+((region.y+i)*self->width + region.x ) * charsize * depth,
+                data + (i*stride) * charsize, region.width * charsize * depth  );
     }
 }
 
@@ -176,25 +171,28 @@ texture_atlas_merge( texture_atlas_t * self )
 }
 
 
-// ----------------------------------------------- texture_atlas_get_region ---
-ivec4
-texture_atlas_get_region( texture_atlas_t * self,
-                          const size_t width,
-                          const size_t height )
+ivec4 texture_atlas_make_region(
+    texture_atlas_t *self,
+    size_t narrow_width,
+    size_t narrow_height,
+    const unsigned char *data,
+    size_t stride)
 {
+    // We want each glyph to be separated by at least one black pixel:
+    size_t width = narrow_width + 1;
+    size_t height = narrow_height + 1;
     assert( self );
 
-    ivec4 region = {{0,0,width,height}};
-    size_t i;
+    ivec4 region = {{0,0,narrow_width,narrow_height}};
 
     int best_height = INT_MAX;
     int best_index  = -1;
     int best_width = INT_MAX;
-    for( i=0; i<self->nodes->size; ++i )
-    {
-        int y = texture_atlas_fit( self, i, width, height );
-        if( y >= 0 )
-        {
+
+    size_t i;
+    for(i=0; i<self->nodes->size; ++i) {
+        int y = texture_atlas_fit(self, i, width, height);
+        if( y >= 0 ) {
             ivec3 *node = (ivec3 *) vector_get( self->nodes, i );
             if( ( (y + height) < best_height ) ||
                 ( ((y + height) == best_height) && (node->z < best_width)) )
@@ -208,8 +206,7 @@ texture_atlas_get_region( texture_atlas_t * self,
         }
     }
 
-    if( best_index == -1 )
-    {
+    if( best_index == -1 ) {
         region.x = -1;
         region.y = -1;
         region.width = 0;
@@ -230,28 +227,20 @@ texture_atlas_get_region( texture_atlas_t * self,
         ivec3 *node = (ivec3 *) vector_get( self->nodes, i );
         ivec3 *prev = (ivec3 *) vector_get( self->nodes, i-1 );
 
-        if (node->x < (prev->x + prev->z) )
-        {
-            int shrink = prev->x + prev->z - node->x;
-            node->x += shrink;
-            node->z -= shrink;
-            if (node->z <= 0)
-            {
-                vector_erase( self->nodes, i );
-                --i;
-            }
-            else
-            {
-                break;
-            }
-        }
-        else
-        {
-            break;
-        }
+        if (node->x >= (prev->x + prev->z) ) break;
+
+        int shrink = prev->x + prev->z - node->x;
+        node->x += shrink;
+        node->z -= shrink;
+        if(node->z > 0) break;
+
+        vector_erase( self->nodes, i );
+        --i;
     }
     texture_atlas_merge( self );
     self->used += width * height;
+
+    set_region(self, region, data, stride);
     return region;
 }
 
