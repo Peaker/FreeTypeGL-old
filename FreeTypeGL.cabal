@@ -39,18 +39,13 @@ Library
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   Build-tools: hsc2hs
   ghc-options: -Wall
+  include-dirs: src
   if os(windows)
-    include-dirs: src windows/include src/windows/freetype
-    ld-options:   -g windows/glew32s.lib windows/glew32mxs.lib
-  else
-    include-dirs: src
-    ld-options:   -g
+    include-dirs: windows/include src/windows/freetype
 
   if flag(use_font_config)
-    cc-options: -g -DUSE_FONT_CONFIG
+    cc-options: -DUSE_FONT_CONFIG
     Extra-libraries: fontconfig
-  else
-    cc-options: -g
 
   c-sources: src/edtaa3func.c
              src/shader.c
@@ -61,6 +56,9 @@ Library
              src/vector.c
              src/vertex-attribute.c
              src/vertex-buffer.c
+  if os(windows)
+    c-sources: windows/glew.c
+    cc-options: -Wno-attributes
 
 source-repository head
   type: git
