@@ -74,7 +74,6 @@ texture_glyph_t *texture_glyph_new( void )
 {
     texture_glyph_t *self = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
     assert (self);
-    self->id        = 0;
     self->width     = 0;
     self->height    = 0;
     self->outline_type = 0;
