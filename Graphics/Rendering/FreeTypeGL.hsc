@@ -2,7 +2,8 @@
 -- | A higher-level interface wrapping the low-level C API
 
 module Graphics.Rendering.FreeTypeGL
-  ( FontDesc(..), fontDescFindFileName
+  ( FreeTypeGL
+  , FontDesc(..), fontDescFindFileName
   , Context, newContext, renderAtlas
   , Font, loadFont, textSize, Vector2(..)
   , Markup(..), noMarkup, Color4(..)
@@ -10,7 +11,7 @@ module Graphics.Rendering.FreeTypeGL
   , initialize
   ) where
 
-import Control.Applicative ((<$>), (<*>))
+import Control.Applicative ((<$>), (<*>), (<$))
 import Foreign.C.String (withCString)
 import Foreign.C.Types (CInt(..))
 import Foreign.ForeignPtr (ForeignPtr)
@@ -28,6 +29,9 @@ import qualified Graphics.Rendering.FreeTypeGL.Internal.FontDesc as IFD
 import qualified Graphics.Rendering.FreeTypeGL.Internal.Shader as Shader
 import qualified Graphics.Rendering.FreeTypeGL.Internal.TextBuffer as ITB
 import qualified Graphics.Rendering.FreeTypeGL.Internal.TextureFont as ITF
+
+-- Token that represents proof the library was initialized
+data FreeTypeGL = FreeTypeGL
 
 data FontDesc = FontDesc
   { fdFamily :: String
@@ -54,8 +58,8 @@ defaultAtlasDepth = 3
 
 
 -- TODO: Use Paths_module
-newContext :: IO Context
-newContext = do
+newContext :: FreeTypeGL -> IO Context
+newContext FreeTypeGL = do
   textVert <- getDataFileName "shaders/text.vert"
   textFrag <- getDataFileName "shaders/text.frag"
   Context
@@ -114,7 +118,7 @@ renderText (TextRenderer buf) = ITB.render buf
 foreign import ccall "freetypegl_init"
   c_freetypegl_init :: IO CInt
 
-initialize :: IO ()
+initialize :: IO FreeTypeGL
 initialize =
-  throwIf_ (/= 0) (("freetypegl_init returned" ++) . show) $
-  c_freetypegl_init
+  FreeTypeGL <$
+  throwIf_ (/= 0) (("freetypegl_init returned" ++) . show) c_freetypegl_init
