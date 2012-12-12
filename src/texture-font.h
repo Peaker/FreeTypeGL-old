@@ -34,6 +34,9 @@
 #ifndef __TEXTURE_FONT_H__
 #define __TEXTURE_FONT_H__
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -226,15 +229,9 @@ typedef struct
      */
     texture_atlas_t * atlas;
 
-    /**
-     * Font filename
-     */
-    char * filename;
-
-    /**
-     * Font size
-     */
-    float size;
+    /* TODO: Share a copy of the library between different fonts? */
+    FT_Library library;
+    FT_Face face;
 
     /**
      * Whether to use autohint when rendering font
@@ -369,7 +366,7 @@ typedef struct
  * @return Number of missed glyph if the texture is not big enough to hold
  *         every glyphs.
  */
-  size_t
+  texture_glyph_t **
   texture_font_load_glyphs( texture_font_t * self,
                             const wchar_t * charcodes );
 

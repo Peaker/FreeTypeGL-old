@@ -96,7 +96,6 @@ data Font = Font
 loadFont :: Atlas -> Shader -> FilePath -> Float -> IO Font
 loadFont atlas shader fileName size = do
   textureFont <- ITF.new (getAtlas atlas) fileName size
-  _ <- ITF.loadGlyphs textureFont $ ['A']
   return $ Font atlas shader textureFont
 
 textSize :: Font -> String -> IO (Vector2 Float)

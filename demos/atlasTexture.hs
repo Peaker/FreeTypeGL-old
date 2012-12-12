@@ -1,5 +1,6 @@
 import Control.Monad
 import Graphics.Rendering.OpenGL.GL (($=))
+import qualified Control.Exception as E
 import qualified Graphics.Rendering.FreeTypeGL.Internal.Atlas as Atlas
 import qualified Graphics.Rendering.FreeTypeGL.Internal.TextureFont as TextureFont
 import qualified Graphics.Rendering.OpenGL.GL as GL
@@ -23,7 +24,7 @@ main = do
   initScreen
   GLFW.setWindowCloseCallback $ fail "Quit"
 
-  atlas <- Atlas.new (GL.Vector2 2048 2048) 1
+  atlas <- Atlas.new (GL.Vector2 512 512) 1
   let filename = "src/fonts/Vera.ttf"
       cache =
         concat
@@ -35,7 +36,9 @@ main = do
       maxSize = 27
   forM_ [minSize .. maxSize-1] $ \i -> do
     font <- TextureFont.new atlas filename i
-    missed <- TextureFont.loadGlyphs font cache
+    missed <-
+      TextureFont.loadGlyphs font cache
+      `E.catch` \(E.SomeException _) -> return ()
     putStrLn $ "Missed: " ++ show missed
   GL.viewport $= (GL.Position 0 0, GL.Size resX resY)
   GL.matrixMode $= GL.Projection

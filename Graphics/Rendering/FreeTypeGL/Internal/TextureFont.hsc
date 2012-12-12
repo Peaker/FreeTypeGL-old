@@ -5,12 +5,12 @@ module Graphics.Rendering.FreeTypeGL.Internal.TextureFont
   , loadGlyphs
   ) where
 
-import Control.Applicative ((<$>))
-import Foreign (Ptr, FunPtr)
+import Foreign (Ptr, nullPtr, FunPtr)
 import Foreign.C.String (CWString, withCWString, withCWStringLen, CString, withCString)
 import Foreign.C.Types (CFloat(..), CSize(..))
 import Foreign.ForeignPtr (ForeignPtr, newForeignPtr, withForeignPtr)
 import Foreign.Marshal.Array (allocaArray, peekArray)
+import Foreign.Marshal.Error (throwIfNull, throwIf_)
 import Graphics.Rendering.FreeTypeGL.Internal.Atlas (Atlas)
 import Graphics.Rendering.OpenGL.GL (Vector2(..))
 
@@ -26,7 +26,7 @@ foreign import ccall "texture_font_get_text_size"
   c_texture_font_get_text_size :: Ptr TextureFont -> CWString -> CSize -> Ptr Float -> IO ()
 
 foreign import ccall "texture_font_load_glyphs"
-  c_texture_font_load_glyphs :: Ptr TextureFont -> CWString -> IO CSize
+  c_texture_font_load_glyphs :: Ptr TextureFont -> CWString -> IO (Ptr ())
 
 foreign import ccall "strdup"
   c_strdup :: CString -> IO CString
@@ -37,7 +37,8 @@ new atlas filename size =
   withCString filename $ \filenamePtr -> do
     newFilenamePtr <- c_strdup filenamePtr
     newForeignPtr c_texture_font_delete =<<
-      c_texture_font_new atlasPtr newFilenamePtr (realToFrac size)
+      throwIfNull ("Failed to make texture font for " ++ show filename)
+      (c_texture_font_new atlasPtr newFilenamePtr (realToFrac size))
 
 getTextSize :: ForeignPtr TextureFont -> String -> IO (Vector2 Float)
 getTextSize textureFont str =
@@ -49,9 +50,9 @@ getTextSize textureFont str =
     return $ Vector2 width height
 
 -- | Returns how many glyphs failed to load
-loadGlyphs :: ForeignPtr TextureFont -> String -> IO Int
+loadGlyphs :: ForeignPtr TextureFont -> String -> IO ()
 loadGlyphs textureFont str =
   withCWString str $ \strPtr ->
   withForeignPtr textureFont $ \fontPtr ->
-  fromIntegral <$>
+  throwIf_ (== nullPtr) (const ("Failed to load glyphs: " ++ show str)) $
   c_texture_font_load_glyphs fontPtr strPtr

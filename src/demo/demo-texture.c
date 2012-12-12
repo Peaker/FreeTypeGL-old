@@ -106,7 +106,9 @@ int main( int argc, char **argv )
             fprintf(stderr, "Failed to load font: \"%s\"\n", filename);
             return -1;
         }
-        missed += texture_font_load_glyphs( font, cache );
+        if(!texture_font_load_glyphs( font, cache )) {
+            missed++;
+        }
         texture_font_delete( font );
     }
 

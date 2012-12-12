@@ -184,16 +184,15 @@ texture_atlas_get_region( texture_atlas_t * self,
 {
     assert( self );
 
-    int y, best_height, best_width, best_index;
     ivec4 region = {{0,0,width,height}};
     size_t i;
 
-    best_height = INT_MAX;
-    best_index  = -1;
-    best_width = INT_MAX;
+    int best_height = INT_MAX;
+    int best_index  = -1;
+    int best_width = INT_MAX;
     for( i=0; i<self->nodes->size; ++i )
     {
-        y = texture_atlas_fit( self, i, width, height );
+        int y = texture_atlas_fit( self, i, width, height );
         if( y >= 0 )
         {
             ivec3 *node = (ivec3 *) vector_get( self->nodes, i );
@@ -258,8 +257,7 @@ texture_atlas_get_region( texture_atlas_t * self,
 
 
 // ---------------------------------------------------- texture_atlas_clear ---
-void
-texture_atlas_clear( texture_atlas_t * self )
+void texture_atlas_clear( texture_atlas_t * self )
 {
     assert( self );
     assert( self->data );

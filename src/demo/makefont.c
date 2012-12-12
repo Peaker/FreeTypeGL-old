@@ -84,7 +84,7 @@ int main( int argc, char **argv )
 {
     size_t i, j;
 
-    wchar_t * font_cache = 
+    wchar_t * font_cache =
         L" !\"#$%&'()*+,-./0123456789:;<=>?"
         L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
         L"`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -95,7 +95,7 @@ int main( int argc, char **argv )
 
     texture_atlas_t * atlas = texture_atlas_new( 128, 128, 1 );
     texture_font_t  * font  = texture_font_new( atlas, font_filename, font_size );
-    
+
 
     glutInit( &argc, argv );
     glutInitWindowSize( atlas->width, atlas->height );
@@ -106,15 +106,15 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
     glBindTexture( GL_TEXTURE_2D, atlas->id );
 
-    size_t missed = texture_font_load_glyphs( font, font_cache );
+    int missed = !!texture_font_load_glyphs( font, font_cache );
 
     wprintf( L"Font filename              : %s\n", font_filename );
     wprintf( L"Font size                  : %.1f\n", font_size );
     wprintf( L"Number of glyphs           : %ld\n", wcslen(font_cache) );
-    wprintf( L"Number of missed glyphs    : %ld\n", missed );
+    wprintf( L"Have missed glyphs         : %d\n", missed );
     wprintf( L"Texture size               : %ldx%ldx%ld\n",
              atlas->width, atlas->height, atlas->depth );
-    wprintf( L"Texture occupancy          : %.2f%%\n", 
+    wprintf( L"Texture occupancy          : %.2f%%\n",
             100.0*atlas->used/(float)(atlas->width*atlas->height) );
     wprintf( L"\n" );
     wprintf( L"Header filename            : %s\n", header_filename );
@@ -140,7 +140,7 @@ int main( int argc, char **argv )
     // -------------
     // Header
     // -------------
-    fwprintf( file, 
+    fwprintf( file,
         L"/* ============================================================================\n"
         L" * Freetype GL - A C OpenGL Freetype engine\n"
         L" * Platform:    Any\n"
@@ -217,7 +217,7 @@ int main( int argc, char **argv )
         L"} texture_font_t;\n\n", texture_size, glyph_count );
 
 
-    
+
     fwprintf( file, L"texture_font_t font = {\n" );
 
 
@@ -250,7 +250,7 @@ int main( int argc, char **argv )
     // -------------------
     // Texture information
     // -------------------
-    fwprintf( file, L" %f, %f, %f, %f, %f, %d, \n", 
+    fwprintf( file, L" %f, %f, %f, %f, %f, %d, \n",
              font->size, font->height,
              font->linegap,font->ascender, font->descender,
              glyph_count );
@@ -273,7 +273,7 @@ int main( int argc, char **argv )
                  glyph->offset_x, glyph->offset_y );
         wprintf( L"  advance    : %f, %f\n",
                  glyph->advance_x, glyph->advance_y );
-        wprintf( L"  tex coords.: %f, %f, %f, %f\n", 
+        wprintf( L"  tex coords.: %f, %f, %f, %f\n",
                  glyph->u0, glyph->v0, glyph->u1, glyph->v1 );
 
         wprintf( L"  kerning    : " );
@@ -281,7 +281,7 @@ int main( int argc, char **argv )
         {
             for( j=0; j < glyph->kerning_count; ++j )
             {
-                wprintf( L"('%lc', %f)", 
+                wprintf( L"('%lc', %f)",
                          glyph->kerning[j].charcode, glyph->kerning[j].kerning );
                 if( j < (glyph->kerning_count-1) )
                 {
