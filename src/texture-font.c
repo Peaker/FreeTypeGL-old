@@ -54,6 +54,7 @@ const struct {
 } FT_Errors[] =
 #include FT_ERRORS_H
 
+#define FT_CHECK(call)    do { ft_err = (call); assert(0 == ft_err); } while(0)
 
 
 
@@ -205,7 +206,8 @@ texture_font_generate_kerning( texture_font_t *self )
         {
             prev_glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
             prev_index = FT_Get_Char_Index( face, prev_glyph->charcode );
-            FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
+            FT_UInt ft_err;
+            FT_CHECK(FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning ));
             // printf("%c(%d)-%c(%d): %ld\n",
             //       prev_glyph->charcode, prev_glyph->charcode,
             //       glyph_index, glyph_index, kerning.x);
@@ -218,8 +220,9 @@ texture_font_generate_kerning( texture_font_t *self )
             }
         }
     }
-    FT_Done_Face( face );
-    FT_Done_FreeType( library );
+    FT_UInt ft_err;
+    FT_CHECK(FT_Done_Face( face ));
+    FT_CHECK(FT_Done_FreeType( library ));
 }
 
 
@@ -507,7 +510,8 @@ texture_font_load_glyphs( texture_font_t * self,
         glyph->t1       = (y + glyph->height)/(float)height;
 
         // Discard hinting to get advance
-        FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
+        FT_UInt ft_err;
+        FT_CHECK(FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING));
         slot = face->glyph;
         glyph->advance_x = slot->advance.x/64.0;
         glyph->advance_y = slot->advance.y/64.0;
@@ -519,9 +523,12 @@ texture_font_load_glyphs( texture_font_t * self,
             FT_Done_Glyph( ft_glyph );
         }
     }
-    FT_Done_Face( face );
-    FT_Done_FreeType( library );
+    FT_UInt ft_err;
+    FT_CHECK(FT_Done_Face( face ));
+    FT_CHECK(FT_Done_FreeType( library ));
+
     texture_atlas_upload( self->atlas );
+
     texture_font_generate_kerning( self );
     return missed;
 }
