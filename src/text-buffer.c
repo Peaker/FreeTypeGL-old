@@ -104,23 +104,15 @@ struct coordinates {
 static GLuint
 add_next_vertex( struct coordinates *coors, vec4 *color, float x, float y, float s, float t, float gamma )
 {
-    float r = color->r;
-    float g = color->g;
-    float b = color->b;
-    float a = color->a;
-
     glyph_vertex_t *gv = coors->cur_vertex;
     coors->cur_vertex++;
 
     assert (gv < coors->end_vertex);
-    gv->x=(int)x;
-    gv->y=y;
-    gv->z=0;
-    gv->u=s;
-    gv->v=t;
-    gv->r=r; gv->g=g; gv->b=b; gv->a=a;
-    gv->shift=x - (int)x;
-    gv->gamma=gamma;
+    gv->pos = (vec3){{ (int)x, y, 0 }};
+    gv->texture_pos = (vec2){{ s, t }};
+    gv->color = *color;
+    gv->x_fraction = x - (int)x;
+    gv->color_gamma_correction = gamma;
 
     return gv - coors->start_vertex;
 }
@@ -280,7 +272,7 @@ text_buffer_add_text( text_buffer_t * self,
             {
                 glyph_vertex_t * vertex =
                     (glyph_vertex_t *)  vector_get( buffer->vertices, j );
-                vertex->y -= dy;
+                vertex->pos.y -= dy;
             }
         }
         self->line_ascender = font->ascender;

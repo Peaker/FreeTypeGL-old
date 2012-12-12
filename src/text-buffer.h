@@ -126,64 +126,16 @@ typedef struct {
 
 
 /**
- * Glyph vertex structure
+ * Glyph vertex structure (WARNING: This is duplicated in the fmt
+ * strings given to vertex_buffer_new, and perhaps the shader
+ * code. Keep in sync when modifying)
  */
 typedef struct {
-    /**
-     * Vertex x coordinates
-     */
-    float x;
-
-    /**
-     * Vertex y coordinates
-     */
-    float y;
-
-    /**
-     * Vertex z coordinates
-     */
-    float z;
-
-    /**
-     * Texture first coordinate
-     */
-    float u;
-
-    /**
-     * Texture second coordinate
-     */
-    float v;
-
-    /**
-     * Color red component
-     */
-    float r;
-
-    /**
-     * Color green component
-     */
-    float g;
-
-    /**
-     * Color blue component
-     */
-    float b;
-
-    /**
-     * Color alpha component
-     */
-    float a;
-
-    /**
-     * Shift along x
-     */
-    float shift;
-
-    /**
-     * Color gamma correction
-     */
-    float gamma;
-
+    vec3 pos;                   /* x with fraction truncated away */
+    vec2 texture_pos;
+    vec4 color;
+    float x_fraction;           /* x's truncated fraction */
+    float color_gamma_correction;
 } glyph_vertex_t;
 
 

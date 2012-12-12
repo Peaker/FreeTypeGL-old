@@ -30,6 +30,9 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
+
+/* This is the GPU program's copy of glyph_vertex_t and must remain in
+   sync! */
 uniform sampler2D texture;
 uniform vec3  pixel;
 varying float vgamma;
