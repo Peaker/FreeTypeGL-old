@@ -74,19 +74,14 @@ texture_glyph_t *texture_glyph_new( void )
 {
     texture_glyph_t *self = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
     assert (self);
-    self->width     = 0;
-    self->height    = 0;
+    self->size = (ivec2){{ 0, 0 }};
     self->outline_type = 0;
     self->outline_thickness = 0.0;
-    self->offset_x  = 0;
-    self->offset_y  = 0;
-    self->advance_x = 0.0;
-    self->advance_y = 0.0;
-    self->s0        = 0.0;
-    self->t0        = 0.0;
-    self->s1        = 0.0;
-    self->t1        = 0.0;
-    self->kerning   = vector_new( sizeof(kerning_t) );
+    self->bearing = (ivec2){{ 0, 0 }};
+    self->advance = (vec2){{ 0, 0 }};
+    self->texture_pos0 = (vec2){{ 0, 0 }};
+    self->texture_pos1 = (vec2){{ 0, 0 }};
+    self->kerning = vector_new( sizeof(kerning_t) );
     return self;
 }
 
@@ -385,22 +380,18 @@ texture_font_load_glyphs( texture_font_t * self,
 
         texture_glyph_t *glyph = texture_glyph_new();
         glyph->charcode = charcodes[i];
-        glyph->width    = region.width;
-        glyph->height   = region.height;
+        glyph->size     = (ivec2){{ region.width, region.height }};
         glyph->outline_type = self->outline_type;
         glyph->outline_thickness = self->outline_thickness;
-        glyph->offset_x = ft_glyph_left;
-        glyph->offset_y = ft_glyph_top;
-        glyph->s0       = region.x/(float)width;
-        glyph->t0       = region.y/(float)height;
-        glyph->s1       = (region.x + region.width)/(float)width;
-        glyph->t1       = (region.y + region.height)/(float)height;
+        glyph->bearing = (ivec2){{ ft_glyph_left, ft_glyph_top }};
+        glyph->texture_pos0 = (vec2){{ region.x/(float)width, region.y/(float)height }};
+        glyph->texture_pos1 = (vec2){{ (region.x + region.width)/(float)width,
+                                       (region.y + region.height)/(float)height }};
 
         // Discard hinting to get advance
         FT_CHECK_CALL(FT_Load_Glyph, ( self->face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING), Error);
         FT_GlyphSlot slot = self->face->glyph;
-        glyph->advance_x = slot->advance.x/64.0;
-        glyph->advance_y = slot->advance.y/64.0;
+        glyph->advance = (vec2){{ slot->advance.x/64.0, slot->advance.y/64.0 }};
 
         vector_push_back( self->glyphs, &glyph );
         pushed++;
@@ -465,10 +456,8 @@ texture_font_get_glyph( texture_font_t * self,
         glyph->charcode = (wchar_t)(-1);
         size_t width  = self->atlas->width;
         size_t height = self->atlas->height;
-        glyph->s0 = (region.x+2)/(float)width;
-        glyph->t0 = (region.y+2)/(float)height;
-        glyph->s1 = (region.x+3)/(float)width;
-        glyph->t1 = (region.y+3)/(float)height;
+        glyph->texture_pos0 = (vec2){{ (region.x+2)/(float)width, (region.y+2)/(float)height }};
+        glyph->texture_pos1 = (vec2){{ (region.x+3)/(float)width, (region.y+3)/(float)height }};
         vector_push_back( self->glyphs, &glyph );
         return glyph; //*(texture_glyph_t **) vector_back( self->glyphs );
     }
@@ -500,7 +489,7 @@ texture_font_get_text_size(
         }
         texture_glyph_t *glyph =
             texture_font_get_glyph( self, text[i] );
-        width += glyph->advance_x;
+        width += glyph->advance.x;
     }
     if(width > maxwidth) maxwidth = width;
 

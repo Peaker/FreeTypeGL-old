@@ -139,10 +139,10 @@ add_glyph( struct coordinates *coors,
     float y0 = (int)( pen->y + y0_offset );
     float x1 = ( x0 + x1_offset );
     float y1 = (int)( y0 + y1_offset );
-    float s0 = glyph->s0;
-    float s1 = glyph->s1;
-    float t0 = glyph->t0;
-    float t1 = glyph->t1;
+    float s0 = glyph->texture_pos0.s;
+    float t0 = glyph->texture_pos0.t;
+    float s1 = glyph->texture_pos1.s;
+    float t1 = glyph->texture_pos1.t;
     GLuint v0 = add_next_vertex (coors, color, x0, y0, s0, t0, gamma);
     GLuint v1 = add_next_vertex (coors, color, x0, y1, s0, t1, gamma);
     GLuint v2 = add_next_vertex (coors, color, x1, y1, s1, t1, gamma);
@@ -211,7 +211,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     if( markup->background_color.alpha > 0 ) {
         add_glyph(&coors, pen, &markup->background_color,
                   -kerning, font->descender,
-                  glyph->advance_x, font->height + font->linegap,
+                  glyph->advance.x, font->height + font->linegap,
                   gamma, black);
     }
 
@@ -219,7 +219,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     if( markup->underline ) {
         add_glyph(&coors, pen, &markup->underline_color,
                   -kerning, font->underline_position,
-                  glyph->advance_x, font->underline_thickness,
+                  glyph->advance.x, font->underline_thickness,
                   gamma, black);
     }
 
@@ -227,26 +227,26 @@ text_buffer_add_wchar( text_buffer_t * self,
     if( markup->overline ) {
         add_glyph(&coors, pen, &markup->overline_color,
                   -kerning, (int)font->ascender,
-                  glyph->advance_x, (int)font->underline_thickness,
+                  glyph->advance.x, (int)font->underline_thickness,
                   gamma, black);
     }
 
     // Actual glyph
     add_glyph(&coors, pen, &markup->foreground_color,
-              glyph->offset_x, glyph->offset_y,
-              glyph->width, -(float)glyph->height,
+              glyph->bearing.x, glyph->bearing.y,
+              glyph->size.x, -(float)glyph->size.y,
               gamma, glyph);
 
     /* Strikethrough */
     if( markup->strikethrough ) {
         add_glyph(&coors, pen, &markup->strikethrough_color,
                   -kerning, (int)font->ascender*.33,
-                  glyph->advance_x, font->underline_thickness,
+                  glyph->advance.x, font->underline_thickness,
                   gamma, black);
     }
 
     coors_push_to_vector( &coors, self->buffer );
-    pen->x += glyph->advance_x;
+    pen->x += glyph->advance.x;
     return 0;
 }
 

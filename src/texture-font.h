@@ -41,6 +41,7 @@
 extern "C" {
 #endif
 
+#include "vec234.h"
 #include "vector.h"
 #include "texture-atlas.h"
 
@@ -125,63 +126,18 @@ typedef struct
 
 typedef struct {
     wchar_t charcode;
-
+    ivec2 size;
     /**
-     * Glyph's width in pixels.
+     * Remember that the vertical bearing is the distance from the
+     * baseline to the top-most glyph scanline, upwards y coordinates
+     * being positive:
      */
-    size_t width;
+    ivec2 bearing;
 
-    /**
-     * Glyph's height in pixels.
-     */
-    size_t height;
+    vec2 advance;
 
-    /**
-     * Glyph's left bearing expressed in integer pixels.
-     */
-    int offset_x;
-
-    /**
-     * Glyphs's top bearing expressed in integer pixels.
-     *
-     * Remember that this is the distance from the baseline to the top-most
-     * glyph scanline, upwards y coordinates being positive.
-     */
-    int offset_y;
-
-    /**
-     * For horizontal text layouts, this is the horizontal distance (in
-     * fractional pixels) used to increment the pen position when the glyph is
-     * drawn as part of a string of text.
-     */
-    float advance_x;
-
-    /**
-     * For vertical text layouts, this is the vertical distance (in fractional
-     * pixels) used to increment the pen position when the glyph is drawn as
-     * part of a string of text.
-     */
-    float advance_y;
-
-    /**
-     * First normalized texture coordinate (x) of top-left corner
-     */
-    float s0;
-
-    /**
-     * Second normalized texture coordinate (y) of top-left corner
-     */
-    float t0;
-
-    /**
-     * First normalized texture coordinate (x) of bottom-right corner
-     */
-    float s1;
-
-    /**
-     * Second normalized texture coordinate (y) of bottom-right corner
-     */
-    float t1;
+    vec2 texture_pos0;
+    vec2 texture_pos1;
 
     /**
      * A vector of kerning pairs relative to this glyph.
@@ -192,10 +148,6 @@ typedef struct {
      * Glyph outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
      */
     int outline_type;
-
-    /**
-     * Glyph outline thickness
-     */
     float outline_thickness;
 
 } texture_glyph_t;
