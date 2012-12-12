@@ -51,7 +51,7 @@ data Context = Context
   }
 
 defaultAtlasSize :: Vector2 Int
-defaultAtlasSize = Vector2 512 512
+defaultAtlasSize = Vector2 2048 2048
 
 defaultAtlasDepth :: Int
 defaultAtlasDepth = 3

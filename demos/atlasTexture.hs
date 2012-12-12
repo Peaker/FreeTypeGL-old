@@ -23,7 +23,7 @@ main = do
   initScreen
   GLFW.setWindowCloseCallback $ fail "Quit"
 
-  atlas <- Atlas.new (GL.Vector2 512 512) 1
+  atlas <- Atlas.new (GL.Vector2 2048 2048) 1
   let filename = "src/fonts/Vera.ttf"
       cache =
         concat
