@@ -208,12 +208,9 @@ text_buffer_add_wchar( text_buffer_t * self,
     }
 
     texture_glyph_t *glyph = texture_font_get_glyph( font, current );
-    texture_glyph_t *black = texture_font_get_glyph( font, -1 );
+    if(glyph == NULL) return -1;
 
-    if( glyph == NULL )
-    {
-        return -1;
-    }
+    texture_glyph_t *black = texture_font_get_glyph( font, -1 );
 
     float kerning = previous ? texture_glyph_get_kerning( glyph, previous ) : 0;
     pen->x += kerning;
