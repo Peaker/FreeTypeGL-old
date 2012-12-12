@@ -16,7 +16,7 @@ foreign import ccall "texture_atlas_new"
   c_texture_atlas_new :: CSize -> CSize -> CSize -> IO (Ptr Atlas)
 
 foreign import ccall "&texture_atlas_delete"
-  c_texture_font_delete :: FunPtr (Ptr Atlas -> IO ())
+  c_texture_atlas_delete :: FunPtr (Ptr Atlas -> IO ())
 
 foreign import ccall "texture_atlas_render"
   c_texture_atlas_render :: Ptr Atlas -> Float -> Float -> Float -> Float -> IO ()
@@ -28,7 +28,7 @@ render atlas (Vector2 x y) (Vector2 width height) =
 
 new :: Vector2 Int -> Int -> IO (ForeignPtr Atlas)
 new (Vector2 width height) depth =
-  newForeignPtr c_texture_font_delete =<<
+  newForeignPtr c_texture_atlas_delete =<<
   c_texture_atlas_new (fi width) (fi height) (fi depth)
   where
     fi = fromIntegral
