@@ -25,7 +25,6 @@ Library
                    Graphics.Rendering.FreeTypeGL.Internal.Shader,
                    Graphics.Rendering.FreeTypeGL.Internal.TextureFont,
                    Graphics.Rendering.FreeTypeGL.Internal.TextBuffer,
-                   Graphics.Rendering.FreeTypeGL.Internal.Atlas,
                    Graphics.Rendering.FreeTypeGL.Internal.Markup
   Other-modules:   Paths_FreeTypeGL
 
@@ -53,6 +52,7 @@ Library
              src/text-buffer.c
              src/texture-atlas.c
              src/texture-font.c
+             src/glyph-cache.c
              src/vector.c
              src/vertex-attribute.c
              src/vertex-buffer.c
@@ -70,15 +70,6 @@ Flag examples
 
 Executable hellobye
   Main-is:       demos/hellobye.hs
-  if !flag(examples)
-    Buildable:     False
-  else
-    Buildable:     True
-    Build-depends: base > 3 && < 5, FreeTypeGL, GLFW-b, OpenGL
-    ghc-options:   -Wall
-
-Executable atlasTexture
-  Main-is:       demos/atlasTexture.hs
   if !flag(examples)
     Buildable:     False
   else

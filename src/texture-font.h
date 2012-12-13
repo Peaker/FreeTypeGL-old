@@ -36,6 +36,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_STROKER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +44,7 @@ extern "C" {
 
 #include "vec234.h"
 #include "vector.h"
-#include "texture-atlas.h"
+#include <stdbool.h>
 
 /**
  * @file   texture-font.h
@@ -107,43 +108,13 @@ enum texture_outline_type {
     TEXTURE_OUTLINE_OUTER = 3,
 };
 
-typedef struct {
-    FT_UInt glyph_index;
-    wchar_t charcode;
-    ivec2 size;
-    /**
-     * Remember that the vertical bearing is the distance from the
-     * baseline to the top-most glyph scanline, upwards y coordinates
-     * being positive:
-     */
-    ivec2 bearing;
-
-    vec2 advance;
-
-    vec2 texture_pos0;
-    vec2 texture_pos1;
-
-    enum texture_outline_type outline_type;
-    float outline_thickness;
-
-} texture_glyph_t;
-
-
-
 /**
  *  Texture font structure.
  */
 typedef struct
 {
-    /**
-     * Vector of glyphs contained in this font.
-     */
-    vector_t * glyphs;
 
-    /**
-     * Atlas structure to store glyphs data.
-     */
-    texture_atlas_t * atlas;
+    bool is_lcd;
 
     /* TODO: Share a copy of the library between different fonts? */
     FT_Library library;
@@ -222,78 +193,40 @@ typedef struct
 
 } texture_font_t;
 
+texture_font_t *texture_font_new(
+    bool is_lcd,
+    const char * filename,
+    const float size );
 
-
-/**
- * This function creates a new texture font from given filename and size.  The
- * texture atlas is used to store glyph on demand. Note the depth of the atlas
- * will determine if the font is rendered as alpha channel only (depth = 1) or
- * RGB (depth = 3) that correspond to subpixel rendering (if available on your
- * freetype implementation).
- *
- * @param atlas     A texture atlas
- * @param filename  A font filename
- * @param size      Size of font to be created (in points)
- *
- * @return A new empty font (no glyph inside yet)
- *
- */
-  texture_font_t *
-  texture_font_new( texture_atlas_t * atlas,
-                    const char * filename,
-                    const float size );
-
+void texture_font_delete( texture_font_t * self );
 
 /**
- * Delete a texture font. Note that this does not delete the glyph from the
- * texture atlas.
- *
- * @param self a valid texture font
- */
-  void
-  texture_font_delete( texture_font_t * self );
+* Get the size of a piece of text with this font
+*
+* @param self   a valid texture font
+* @param text   Text to get the size of
+* @param length Length of text to be sized (or 0 for null termination)
+* @param out_size Output parameter that will contain the size
+*/
+void
+texture_font_get_text_size(
+    texture_font_t *self, wchar_t *text, size_t length, vec2 *out_size );
 
+typedef struct {
+    FT_Glyph ft_glyph; /* Only valid if outline_type is not
+                        * TEXTURE_OUTLINE_NONE */
+    FT_UInt glyph_index;
+    ivec2 bearing;
+    FT_Bitmap *bitmap;
+    vec2 advance;
+} texture_font_loaded_glyph_t;
 
-/**
- * Request a new glyph from the font. If it has not been created yet, it will
- * be.
- *
- * @param self     A valid texture font
- * @param charcode Character codepoint to be loaded.
- *
- * @return A pointer on the new glyph or 0 if the texture atlas is not big
- *         enough
- *
- */
-  texture_glyph_t *
-  texture_font_get_glyph( texture_font_t * self,
-                          wchar_t charcode );
-
-
-/**
- * Request the loading of several glyphs at once.
- *
- * @param self      a valid texture font
- * @param charcodes character codepoints to be loaded.
- *
- * @return Number of missed glyph if the texture is not big enough to hold
- *         every glyphs.
- */
-  texture_glyph_t **
-  texture_font_load_glyphs( texture_font_t * self,
-                            const wchar_t * charcodes );
-
-/**
- * Get the size of a piece of text with this font
- *
- * @param self   a valid texture font
- * @param text   Text to get the size of
- * @param length Length of text to be sized (or 0 for null termination)
- * @param out_size Output parameter that will contain the size
- */
-  void
-  texture_font_get_text_size(
-      texture_font_t *self, wchar_t *text, size_t length, vec2 *out_size );
+int texture_font_load_glyph(
+    texture_font_t *self, wchar_t charcode, int is_lcd,
+    texture_font_loaded_glyph_t *out) __attribute__ ((warn_unused_result));
+void texture_font_done_glyph(
+    texture_font_t *self,
+    texture_font_loaded_glyph_t *loaded);
 
 /**
  * Get the kerning between two horizontal glyphs.
@@ -306,10 +239,7 @@ typedef struct
 float texture_font_get_kerning(
     texture_font_t *,
     FT_UInt glyph_index,
-    FT_UInt prev_glyph_index);
-
-float texture_font_glyph_get_kerning(
-    texture_font_t *, texture_glyph_t *, wchar_t prev_char);
+    wchar_t prev_char);
 
 /** @} */
 

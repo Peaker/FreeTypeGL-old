@@ -47,9 +47,8 @@ main = do
   initScreen
   GLFW.setWindowCloseCallback $ fail "Quit"
 
-  atlas <- FGL.newAtlas FGL.defaultAtlasNewParams
   shader <- FGL.newShader
-  font <- FGL.loadFont atlas shader ttfFilename 72.0
+  font <- FGL.loadFont FGL.IsLCD shader ttfFilename 72.0
   let hello = FGL.textRenderer (GL.Vector2 100 100) markup font "Hello world"
       bye = FGL.textRenderer (GL.Vector2 100 200) FGL.noMarkup font "Bye world"
 

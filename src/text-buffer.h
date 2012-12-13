@@ -41,6 +41,7 @@ extern "C" {
 #include "markup.h"
 #include "texture-atlas.h"
 #include "texture-font.h"
+#include "glyph-cache.h"
 #include "vertex-buffer.h"
 
 
@@ -84,7 +85,7 @@ typedef struct {
      */
     vertex_buffer_t *buffer;
 
-    texture_atlas_t *atlas;
+    glyph_cache_t cache;
 
     /**
      * Pen origin
@@ -146,8 +147,7 @@ typedef struct {
  * @return  a new empty text buffer.
  *
  */
-  text_buffer_t *
-  text_buffer_new( texture_atlas_t *atlas, GLuint shader );
+  text_buffer_t *text_buffer_new( GLuint shader, const ivec2 *size, int depth );
 
 /**
  * Delete a text buffer.

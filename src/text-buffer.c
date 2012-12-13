@@ -41,13 +41,12 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-text_buffer_t *
-text_buffer_new( texture_atlas_t *atlas, GLuint shader )
+text_buffer_t *text_buffer_new( GLuint shader, const ivec2 *size, int depth )
 {
 
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f:2g1f" );
-    self->atlas = atlas;
+    glyph_cache_init( &self->cache, size, depth );
     self->shader = shader;
     self->shader_texture = glGetUniformLocation(self->shader, "texture");
     self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
@@ -68,11 +67,13 @@ text_buffer_delete( text_buffer_t *self )
 void
 text_buffer_render( text_buffer_t * self )
 {
+    texture_atlas_upload(self->cache.atlas);
+
     glEnable( GL_BLEND );
     glEnable( GL_TEXTURE_2D );
     glColor4f( 1.0, 1.0, 1.0, 1.0);
 
-    if( self->atlas->depth == 1 ) {
+    if( self->cache.atlas->depth == 1 ) {
         glDisable( GL_COLOR_MATERIAL );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
@@ -84,9 +85,9 @@ text_buffer_render( text_buffer_t * self )
         glUseProgram( self->shader );
         glUniform1i( self->shader_texture, 0 );
         glUniform3f( self->shader_pixel,
-                     1.0/self->atlas->size.x,
-                     1.0/self->atlas->size.y,
-                     self->atlas->depth );
+                     1.0/self->cache.atlas->size.x,
+                     1.0/self->cache.atlas->size.y,
+                     self->cache.atlas->depth );
         vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
         glUseProgram( 0 );
     }
@@ -127,13 +128,13 @@ add_next_index( struct coordinates *coors )
     return i;
 }
 
-static void
-add_glyph( struct coordinates *coors,
-           vec2 *pen, vec4 *color,
-           float x0_offset, float y0_offset,
-           float x1_offset, float y1_offset,
-           float gamma,
-           texture_glyph_t *glyph )
+static void add_glyph(
+    struct coordinates *coors,
+    vec2 *pen, vec4 *color,
+    float x0_offset, float y0_offset,
+    float x1_offset, float y1_offset,
+    float gamma,
+    texture_glyph_t *glyph )
 {
     float x0 = ( pen->x + x0_offset );
     float y0 = (int)( pen->y + y0_offset );
@@ -199,12 +200,12 @@ text_buffer_add_wchar( text_buffer_t * self,
         return 0;
     }
 
-    texture_glyph_t *glyph = texture_font_get_glyph( font, current );
+    texture_glyph_t *glyph = glyph_cache_get_glyph( &self->cache, font, current );
     if(glyph == NULL) return -1;
 
-    texture_glyph_t *black = texture_font_get_glyph( font, -1 );
+    texture_glyph_t *black = glyph_cache_get_glyph( &self->cache, NULL, -1 );
 
-    float kerning = previous ? texture_font_glyph_get_kerning( font, glyph, previous ) : 0;
+    float kerning = previous ? glyph_cache_get_kerning( &self->cache, glyph, previous ) : 0;
     pen->x += kerning;
 
     // Background

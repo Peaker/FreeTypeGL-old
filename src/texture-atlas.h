@@ -51,6 +51,7 @@ extern "C" {
 #include "vector.h"
 #include "vec234.h"
 #include "opengl.h"
+#include <stdbool.h>
 
 /**
  * @file   texture-atlas.h
@@ -115,10 +116,9 @@ typedef struct
      */
     unsigned int id;
 
-    /**
-     * Atlas data
-     */
     unsigned char * data;
+
+    bool uploaded;
 
 } texture_atlas_t;
 

@@ -110,7 +110,8 @@ int main( int argc, char **argv )
     GLuint indices[4*3] = { 0,1, 2,3, };
     vertex_buffer_push_back( buffer, vertices, 4, indices, 4 );
 
-    text_buffer = text_buffer_new( LCD_FILTERING_ON );
+    ivec2 atlas_size = {{ 512, 512 }};
+    text_buffer = text_buffer_new( &atlas_size, LCD_FILTERING_ON );
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
     markup_t markup = {

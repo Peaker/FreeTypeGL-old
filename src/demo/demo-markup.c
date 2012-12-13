@@ -151,7 +151,8 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    buffer = text_buffer_new( LCD_FILTERING_ON );
+    ivec2 atlas_size = {{ 512, 512 }};
+    buffer = text_buffer_new( &atlas_size, LCD_FILTERING_ON );
 
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};

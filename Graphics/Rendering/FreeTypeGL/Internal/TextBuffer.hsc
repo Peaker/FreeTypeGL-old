@@ -4,12 +4,14 @@ module Graphics.Rendering.FreeTypeGL.Internal.TextBuffer
   , Pen, Vector2(..)
   ) where
 
+import Control.Applicative ((<$>))
 import Foreign (FunPtr, Ptr)
 import Foreign.C.String (CWString, withCWStringLen)
 import Foreign.C.Types (CSize(..), CUInt(..), CInt(..))
 import Foreign.ForeignPtr (ForeignPtr, withForeignPtr, newForeignPtr)
+import Foreign.Marshal.Alloc (alloca)
 import Foreign.Marshal.Error (throwIf_)
-import Graphics.Rendering.FreeTypeGL.Internal.Atlas (Atlas)
+import Foreign.Storable (Storable(..))
 import Graphics.Rendering.FreeTypeGL.Internal.Markup (Markup)
 import Graphics.Rendering.FreeTypeGL.Internal.Shader (Shader(..))
 import Graphics.Rendering.FreeTypeGL.Internal.TextureFont (TextureFont)
@@ -20,7 +22,7 @@ import Graphics.Rendering.OpenGL.GL (Vector2(..))
 data TextBuffer
 
 foreign import ccall "text_buffer_new"
-  c_text_buffer_new :: Ptr Atlas -> Shader -> IO (Ptr TextBuffer)
+  c_text_buffer_new :: Shader -> Ptr (Vector2 CInt) -> CInt -> IO (Ptr TextBuffer)
 
 foreign import ccall "text_buffer_render"
   c_text_buffer_render :: Ptr TextBuffer -> IO ()
@@ -33,11 +35,12 @@ foreign import ccall "text_buffer_add_text"
 foreign import ccall "&text_buffer_delete"
   c_text_buffer_delete :: FunPtr (Ptr TextBuffer -> IO ())
 
-new :: ForeignPtr Atlas -> Shader -> IO (ForeignPtr TextBuffer)
-new atlas shader =
-  withForeignPtr atlas $ \atlasPtr -> do
-    ptr <- c_text_buffer_new atlasPtr shader
-    newForeignPtr c_text_buffer_delete ptr
+new :: Shader -> Vector2 Int -> Int -> IO (ForeignPtr TextBuffer)
+new shader atlasSize depth =
+  alloca $ \sizePtr -> do
+    poke sizePtr $ fromIntegral <$> atlasSize
+    newForeignPtr c_text_buffer_delete =<<
+      c_text_buffer_new shader sizePtr (fromIntegral depth)
 
 render :: ForeignPtr TextBuffer -> IO ()
 render = flip withForeignPtr c_text_buffer_render

@@ -109,13 +109,13 @@ int main( int argc, char **argv )
     vertex_buffer_push_back( buffer, vertices, 8, indices, 12 );
 
 
-    texture_atlas_t *atlas = texture_atlas_new(512, 512, LCD_FILTERING_ON);
     GLuint shader = shader_load("../shaders/text.vert", "../shaders/text.frag");
     if((GLuint)-1 == shader) {
         fprintf(stderr, "Can't load shader!\n");
         return -1;
     }
-    text_buffer = text_buffer_new(atlas, shader);
+    ivec2 atlas_size = {{ 512, 512 }};
+    text_buffer = text_buffer_new(shader, &atlas_size, LCD_FILTERING_ON);
     vec4 white = {{1.0, 1.0, 1.0, 1.0}};
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};

@@ -52,6 +52,7 @@ texture_atlas_new( const ivec2 *size, const size_t depth )
     self->size = *size;
     self->depth = depth;
     self->id = 0;
+    self->uploaded = false;
 
     // We want a one pixel border around the whole atlas to avoid any artefact when
     // sampling texture
@@ -238,6 +239,7 @@ ivec4 texture_atlas_make_region(
     self->used += width * height;
 
     set_region(self, region, data, stride);
+    self->uploaded = false;
     return region;
 }
 
@@ -255,6 +257,8 @@ void texture_atlas_clear( texture_atlas_t * self )
     ivec3 node = {{1,1,self->size.x-2}};
     vector_push_back( self->nodes, &node );
     memset( self->data, 0, self->size.x*self->size.y*self->depth );
+
+    self->uploaded = false;
 }
 
 
@@ -262,13 +266,8 @@ void texture_atlas_clear( texture_atlas_t * self )
 void
 texture_atlas_upload( texture_atlas_t * self )
 {
-    assert( self );
-    assert( self->data );
-
-    if( !self->id )
-    {
-        glGenTextures( 1, &self->id );
-    }
+    if(self->uploaded) return;
+    if(!self->id) glGenTextures( 1, &self->id );
 
     glBindTexture( GL_TEXTURE_2D, self->id );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -295,6 +294,7 @@ texture_atlas_upload( texture_atlas_t * self )
         glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->size.x, self->size.y,
                       0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
     }
+    self->uploaded = true;
 }
 
 void
