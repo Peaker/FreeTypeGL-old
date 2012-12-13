@@ -47,4 +47,8 @@ texture_glyph_t *glyph_cache_get_glyph( glyph_cache_t *, texture_font_t *, wchar
 float glyph_cache_get_kerning(
     glyph_cache_t *, texture_glyph_t *, wchar_t prev_char);
 
+void glyph_cache_get_text_size(
+    glyph_cache_t *, texture_font_t *font,
+    wchar_t *text, vec2 *out_size );
+
 #endif

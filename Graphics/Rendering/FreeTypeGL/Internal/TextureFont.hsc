@@ -2,20 +2,25 @@
 module Graphics.Rendering.FreeTypeGL.Internal.TextureFont
   ( TextureFont
   , IsLCD(..), new
-  , Vector2(..)
+  , Vector2(..), textSize
   ) where
 
 import Foreign (Ptr, FunPtr)
-import Foreign.C.String (CString, withCString)
-import Foreign.C.Types (CFloat(..))
-import Foreign.ForeignPtr (ForeignPtr, newForeignPtr)
-import Foreign.Marshal.Error (throwIfNull)
+import Foreign.C.String (CString, withCString, CWString, withCWString)
+import Foreign.C.Types (CFloat(..), CInt(..))
+import Foreign.ForeignPtr (ForeignPtr, newForeignPtr, withForeignPtr)
+import Foreign.Marshal.Alloc (alloca)
+import Foreign.Marshal.Error (throwIfNull, throwIf_)
+import Foreign.Storable (peek)
 import Graphics.Rendering.OpenGL.GL (Vector2(..))
 
 data TextureFont
 
 foreign import ccall "texture_font_new"
   c_texture_font_new :: Bool -> CString -> CFloat -> IO (Ptr TextureFont)
+
+foreign import ccall "texture_font_get_text_size"
+  c_texture_font_get_text_size :: Ptr TextureFont -> CWString -> Ptr (Vector2 Float) -> IO CInt
 
 foreign import ccall "&texture_font_delete"
   c_texture_font_delete :: FunPtr (Ptr TextureFont -> IO ())
@@ -36,3 +41,12 @@ new isLcd filename size =
   where
     toBool IsLCD = True
     toBool NotLCD = False
+
+textSize :: ForeignPtr TextureFont -> String -> IO (Vector2 Float)
+textSize font str =
+  withForeignPtr font $ \fontPtr ->
+  withCWString str $ \strPtr ->
+  alloca $ \sizePtr -> do
+    throwIf_ (/= 0) (("returned: " ++) . show)
+      (c_texture_font_get_text_size fontPtr strPtr sizePtr)
+    peek sizePtr

@@ -207,6 +207,28 @@ void texture_font_delete( texture_font_t *self )
 }
 
 /* 0 for success */
+static int texture_font_get_advance_index(
+    texture_font_t *self, FT_UInt glyph_index, vec2 *out_advance)
+{
+    // Discard hinting to get advance
+    FT_CHECK_CALL(FT_Load_Glyph, ( self->face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING),
+                  Error);
+    *out_advance =
+        (vec2){{ self->face->glyph->advance.x/64.0,
+                 self->face->glyph->advance.y/64.0 }};
+    return 0;
+Error:
+    return -1;
+}
+
+/* 0 for success */
+static int texture_font_get_advance(texture_font_t *self, wchar_t charcode, vec2 *out_advance)
+{
+    FT_UInt glyph_index = FT_Get_Char_Index( self->face, charcode );
+    return texture_font_get_advance_index(self, glyph_index, out_advance);
+}
+
+/* 0 for success */
 int texture_font_load_glyph(
     texture_font_t *self, wchar_t charcode, int is_lcd,
     texture_font_loaded_glyph_t *out)
@@ -216,11 +238,8 @@ int texture_font_load_glyph(
     //          LCD subpixel rendering
     FT_Int32 flags = 0;
 
-    // Discard hinting to get advance
-    FT_CHECK_CALL(FT_Load_Glyph, ( self->face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING),
-                  Error);
-    vec2 advance = {{ self->face->glyph->advance.x/64.0,
-                      self->face->glyph->advance.y/64.0 }};
+    vec2 advance;
+    if(0 != texture_font_get_advance_index(self, glyph_index, &advance)) goto Error;
 
     if( self->outline_type != TEXTURE_OUTLINE_NONE ) {
         flags |= FT_LOAD_NO_BITMAP;
@@ -300,4 +319,28 @@ void texture_font_done_glyph(texture_font_t *self, texture_font_loaded_glyph_t *
     if(self->outline_type != TEXTURE_OUTLINE_NONE) {
         FT_Done_Glyph( loaded->ft_glyph );
     }
+}
+
+/* 0 for success */
+int texture_font_get_text_size(texture_font_t *self, wchar_t *text, vec2 *out_size)
+{
+    float maxwidth = 0;
+    float width = 0;
+    unsigned lines = 1;
+    size_t i;
+    for(i=0; text[i]; ++i) {
+        if (text[i] == L'\n') {
+            if(width > maxwidth) maxwidth = width;
+            width = 0;
+            lines++;
+            continue;
+        }
+        vec2 advance;
+        if(0 != texture_font_get_advance(self, text[i], &advance)) return -1;
+        width += advance.x;
+    }
+    if(width > maxwidth) maxwidth = width;
+
+    *out_size = (vec2){{ maxwidth, lines * self->height }};
+    return 0;
 }

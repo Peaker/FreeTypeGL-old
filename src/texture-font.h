@@ -38,10 +38,6 @@
 #include FT_FREETYPE_H
 #include FT_STROKER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "vec234.h"
 #include "vector.h"
 #include <stdbool.h>
@@ -63,8 +59,6 @@ extern "C" {
  *   return 0;
  * }
  * @endcode
- *
- * @{
  */
 
 
@@ -200,18 +194,6 @@ texture_font_t *texture_font_new(
 
 void texture_font_delete( texture_font_t * self );
 
-/**
-* Get the size of a piece of text with this font
-*
-* @param self   a valid texture font
-* @param text   Text to get the size of
-* @param length Length of text to be sized (or 0 for null termination)
-* @param out_size Output parameter that will contain the size
-*/
-void
-texture_font_get_text_size(
-    texture_font_t *self, wchar_t *text, size_t length, vec2 *out_size );
-
 typedef struct {
     FT_Glyph ft_glyph; /* Only valid if outline_type is not
                         * TEXTURE_OUTLINE_NONE */
@@ -241,10 +223,8 @@ float texture_font_get_kerning(
     FT_UInt glyph_index,
     wchar_t prev_char);
 
-/** @} */
-
-#ifdef __cplusplus
-}
-#endif
+int texture_font_get_text_size(
+    texture_font_t *,
+    wchar_t *text, vec2 *out_size) __attribute__ ((warn_unused_result));
 
 #endif /* __TEXTURE_FONT_H__ */

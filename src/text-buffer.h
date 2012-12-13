@@ -124,30 +124,13 @@ typedef struct {
 
 } text_buffer_t;
 
-
-
-/**
- * Glyph vertex structure (WARNING: This is duplicated in the fmt
- * strings given to vertex_buffer_new, and perhaps the shader
- * code. Keep in sync when modifying)
- */
-typedef struct {
-    vec3 pos;                   /* x with fraction truncated away */
-    vec2 texture_pos;
-    vec4 color;
-    float x_fraction;           /* x's truncated fraction */
-    float color_gamma_correction;
-} glyph_vertex_t;
-
-
-
 /**
  * Creates a new empty text buffer.
  *
  * @return  a new empty text buffer.
  *
  */
-  text_buffer_t *text_buffer_new( GLuint shader, const ivec2 *size, int depth );
+text_buffer_t *text_buffer_new( GLuint shader, const ivec2 *size, int depth );
 
 /**
  * Delete a text buffer.
@@ -155,8 +138,8 @@ typedef struct {
  * @param self a text buffer
  *
  */
-  void
-  text_buffer_delete( text_buffer_t *self );
+void
+text_buffer_delete( text_buffer_t *self );
 
 
 /**
@@ -165,8 +148,8 @@ typedef struct {
  * @param self a text buffer
  *
  */
-  void
-  text_buffer_render( text_buffer_t * self );
+void
+text_buffer_render( text_buffer_t * self );
 
  /**
   * Add some text to the text buffer
@@ -179,12 +162,11 @@ typedef struct {
   *
   * @return 0 for success.
   */
-  int
-  text_buffer_add_text( text_buffer_t * self,
-                        vec2 * pen, markup_t * markup,
-                        texture_font_t * font,
-                        wchar_t * text );
-
+int
+text_buffer_add_text( text_buffer_t * self,
+                      vec2 * pen, markup_t * markup,
+                      texture_font_t * font,
+                      wchar_t * text );
 
 /** @} */
 

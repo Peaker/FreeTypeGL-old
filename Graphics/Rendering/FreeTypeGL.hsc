@@ -4,9 +4,10 @@
 module Graphics.Rendering.FreeTypeGL
   ( FontDesc(..), fontDescFindFileName
   , Shader, newShader
-  , Font, IsLCD(..), loadFont, textSize, Vector2(..)
+  , Font, IsLCD(..), loadFont, textSize
+  , Vector2(..)
   , Markup(..), noMarkup, Color4(..)
-  , TextRenderer, textRenderer, renderText
+  , TextRenderer, textRenderer, textRendererSize, renderText
   , initialize
   ) where
 
@@ -64,7 +65,7 @@ newShader = do
 
 data Font = Font
   { _fShader :: Shader
-  , _fFont :: ForeignPtr ITF.TextureFont
+  , fFont :: ForeignPtr ITF.TextureFont
   }
 
 loadFont :: IsLCD -> Shader -> FilePath -> Float -> IO Font
@@ -91,5 +92,8 @@ textRenderer pos markup (Font shader font) str = unsafePerformIO $
 renderText :: TextRenderer -> IO ()
 renderText = ITB.render . trBuffer
 
-textSize :: TextRenderer -> Vector2 Float
-textSize = trSize
+textRendererSize :: TextRenderer -> Vector2 Float
+textRendererSize = trSize
+
+textSize :: Font -> String -> IO (Vector2 Float)
+textSize = ITF.textSize . fFont

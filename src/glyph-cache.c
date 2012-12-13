@@ -136,33 +136,6 @@ texture_glyph_t *glyph_cache_get_glyph(glyph_cache_t * self, texture_font_t *fon
     return glyph;
 }
 
-void glyph_cache_get_text_size(
-    glyph_cache_t *self, texture_font_t *font,
-    wchar_t *text, size_t length,
-    vec2 *out_size )
-{
-    if( 0 == length ) length = wcslen(text);
-
-    float maxwidth = 0;
-    float width = 0;
-    unsigned lines = 1;
-    size_t i;
-    for( i=0; i<length; ++i ) {
-        if (text[i] == L'\n') {
-            if(width > maxwidth) maxwidth = width;
-            width = 0;
-            lines++;
-            continue;
-        }
-        texture_glyph_t *glyph =
-            glyph_cache_get_glyph( self, font, text[i] );
-        width += glyph->advance.x;
-    }
-    if(width > maxwidth) maxwidth = width;
-
-    *out_size = (vec2){{ maxwidth, lines * font->height }};
-}
-
 float glyph_cache_get_kerning(
     glyph_cache_t *self, texture_glyph_t *glyph, wchar_t prev_char)
 {
