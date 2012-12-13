@@ -98,15 +98,7 @@ typedef struct
      */
     vector_t * nodes;
 
-    /**
-     *  Width (in pixels) of the underlying texture
-     */
-    size_t width;
-
-    /**
-     * Height (in pixels) of the underlying texture
-     */
-    size_t height;
+    ivec2 size;
 
     /**
      * Depth (in bytes) of the underlying texture
@@ -142,9 +134,7 @@ typedef struct
  *
  */
   texture_atlas_t *
-  texture_atlas_new( const size_t width,
-                     const size_t height,
-                     const size_t depth );
+  texture_atlas_new( const ivec2 *size, const size_t depth );
 
 
 /**

@@ -5,15 +5,18 @@ module Graphics.Rendering.FreeTypeGL.Internal.Atlas
   , render
   ) where
 
+import Control.Applicative ((<$>))
 import Foreign (Ptr, FunPtr)
-import Foreign.C.Types (CSize(..))
+import Foreign.C.Types (CSize(..), CInt(..))
 import Foreign.ForeignPtr (ForeignPtr, newForeignPtr, withForeignPtr)
+import Foreign.Marshal.Alloc (alloca)
+import Foreign.Storable (Storable(..))
 import Graphics.Rendering.OpenGL.GL (Vector2(..))
 
 data Atlas
 
 foreign import ccall "texture_atlas_new"
-  c_texture_atlas_new :: CSize -> CSize -> CSize -> IO (Ptr Atlas)
+  c_texture_atlas_new :: Ptr (Vector2 CInt) -> CSize -> IO (Ptr Atlas)
 
 foreign import ccall "&texture_atlas_delete"
   c_texture_atlas_delete :: FunPtr (Ptr Atlas -> IO ())
@@ -27,8 +30,8 @@ render atlas (Vector2 x y) (Vector2 width height) =
   withForeignPtr atlas $ \atlasPtr -> c_texture_atlas_render atlasPtr x y width height
 
 new :: Vector2 Int -> Int -> IO (ForeignPtr Atlas)
-new (Vector2 width height) depth =
-  newForeignPtr c_texture_atlas_delete =<<
-  c_texture_atlas_new (fi width) (fi height) (fi depth)
-  where
-    fi = fromIntegral
+new vec depth =
+  alloca $ \sizePtr -> do
+    poke sizePtr $ fromIntegral <$> vec
+    newForeignPtr c_texture_atlas_delete =<<
+      c_texture_atlas_new sizePtr (fromIntegral depth)

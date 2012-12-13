@@ -366,8 +366,7 @@ texture_glyph_t **texture_font_load_glyphs(
     assert( charcodes );
 
     size_t missed = 0, pushed = 0;
-    size_t width  = self->atlas->width;
-    size_t height = self->atlas->height;
+    ivec2 size = self->atlas->size;
     size_t depth  = self->atlas->depth;
 
     /* Load each glyph */
@@ -394,9 +393,9 @@ texture_glyph_t **texture_font_load_glyphs(
             glyph->outline_type = self->outline_type;
             glyph->outline_thickness = self->outline_thickness;
             glyph->bearing = loaded.bearing;
-            glyph->texture_pos0 = (vec2){{ region.x/(float)width, region.y/(float)height }};
-            glyph->texture_pos1 = (vec2){{ (region.x + region.width)/(float)width,
-                                           (region.y + region.height)/(float)height }};
+            glyph->texture_pos0 = (vec2){{ region.x/(float)size.x, region.y/(float)size.y }};
+            glyph->texture_pos1 = (vec2){{ (region.x + region.width)/(float)size.x,
+                                           (region.y + region.height)/(float)size.y }};
             glyph->advance = loaded.advance;
 
             vector_push_back( self->glyphs, &glyph );
@@ -459,10 +458,9 @@ texture_font_get_glyph( texture_font_t * self,
         texture_glyph_t * glyph = texture_glyph_new();
         glyph->charcode = (wchar_t)(-1);
         glyph->glyph_index = -1;
-        size_t width  = self->atlas->width;
-        size_t height = self->atlas->height;
-        glyph->texture_pos0 = (vec2){{ (region.x+2)/(float)width, (region.y+2)/(float)height }};
-        glyph->texture_pos1 = (vec2){{ (region.x+3)/(float)width, (region.y+3)/(float)height }};
+        ivec2 size  = self->atlas->size;
+        glyph->texture_pos0 = (vec2){{ (region.x+2)/(float)size.x, (region.y+2)/(float)size.y }};
+        glyph->texture_pos1 = (vec2){{ (region.x+3)/(float)size.x, (region.y+3)/(float)size.y }};
         vector_push_back( self->glyphs, &glyph );
         return glyph; //*(texture_glyph_t **) vector_back( self->glyphs );
     }

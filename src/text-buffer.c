@@ -84,8 +84,8 @@ text_buffer_render( text_buffer_t * self )
         glUseProgram( self->shader );
         glUniform1i( self->shader_texture, 0 );
         glUniform3f( self->shader_pixel,
-                     1.0/self->atlas->width,
-                     1.0/self->atlas->height,
+                     1.0/self->atlas->size.x,
+                     1.0/self->atlas->size.y,
                      self->atlas->depth );
         vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
         glUseProgram( 0 );
