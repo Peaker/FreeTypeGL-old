@@ -4,7 +4,7 @@
 module Graphics.Rendering.FreeTypeGL
   ( FontDesc(..), fontDescFindFileName
   , Shader, newShader
-  , Font, IsLCD(..), loadFont, textSize
+  , Font, loadFont, textSize
   , Vector2(..)
   , Markup(..), noMarkup, Color4(..)
   , TextRenderer, textRenderer, textRendererSize, renderText
@@ -68,9 +68,9 @@ data Font = Font
   , fFont :: ForeignPtr ITF.TextureFont
   }
 
-loadFont :: IsLCD -> Shader -> FilePath -> Float -> IO Font
-loadFont isLcd shader fileName size = do
-  textureFont <- ITF.new isLcd fileName size
+loadFont :: Shader -> FilePath -> Float -> IO Font
+loadFont shader fileName size = do
+  textureFont <- ITF.new NotLCD fileName size
   return $ Font shader textureFont
 
 data TextRenderer = TextRenderer
@@ -84,7 +84,7 @@ textRenderer pos markup (Font shader font) str = unsafePerformIO $
   alloca $ \markupPtr -> do
     poke pen pos
     poke markupPtr markup
-    textBuffer <- ITB.new shader (Vector2 512 512) 3 -- TODO: Selectable atlas size/depth
+    textBuffer <- ITB.new shader (Vector2 512 512) 1
     ITB.addText textBuffer markupPtr font pen str
     newPos <- peek pen
     return $ TextRenderer textBuffer ((-) <$> newPos <*> pos)

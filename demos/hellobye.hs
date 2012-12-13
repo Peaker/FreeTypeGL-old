@@ -48,7 +48,7 @@ main = do
   GLFW.setWindowCloseCallback $ fail "Quit"
 
   shader <- FGL.newShader
-  font <- FGL.loadFont FGL.IsLCD shader ttfFilename 72.0
+  font <- FGL.loadFont shader ttfFilename 72.0
   let hello = FGL.textRenderer (GL.Vector2 100 100) markup font "Hello world"
       bye = FGL.textRenderer (GL.Vector2 100 200) FGL.noMarkup font "Bye world"
 
