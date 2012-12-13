@@ -293,6 +293,8 @@ int text_buffer_add_text(
         self->line_descender = font->descender;
     }
 
+    if(!text[0]) return 0;
+
     int rc;
     if(0 != (rc = text_buffer_add_wchar( self, pen, markup, font, text[0], 0 ))) {
         return rc;

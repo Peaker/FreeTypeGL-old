@@ -49,7 +49,7 @@ addText :: ForeignPtr TextBuffer -> Ptr Markup -> ForeignPtr TextureFont -> Ptr 
 addText textBuffer markup font pen str =
   throwIf_ (/= 0)
   ((++ "Most likely cause: Out of atlas memory. Try to enlarge the atlas.") .
-   ("text_buffer_add_text returned: " ++) . show) .
+   (("text_buffer_add_text " ++ show str ++ " returned: ") ++) . show) .
   withCWString str $ \strPtr ->
   withForeignPtr textBuffer $ \textBufferPtr ->
   withForeignPtr font $ \fontPtr ->
