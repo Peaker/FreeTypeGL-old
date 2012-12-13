@@ -78,7 +78,7 @@ void gl_print( texture_font_t * font,
         glyph = (texture_glyph_t *) texture_font_get_glyph( font, text[i] );
         if( i > 0 )
         {
-            glTranslatef(0, texture_glyph_get_kerning( glyph, text[i-1] ), 0);
+            glTranslatef(0, texture_font_glyph_get_kerning( font, glyph, text[i-1] ), 0);
         }
         glCallList( glyph->id );
         glTranslatef( (int)glyph->advance_x, 0, 0 );

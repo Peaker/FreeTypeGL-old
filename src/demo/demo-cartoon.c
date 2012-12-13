@@ -96,7 +96,7 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
         float kerning = 0;
         if( i > 0)
         {
-            kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+            kerning = texture_font_glyph_get_kerning( font, glyph, text[i-1] );
         }
         pen.x += kerning;
 

@@ -250,7 +250,7 @@ build_buffer( void )
             float kerning = 0.0;
             if( p_kerning )
             {
-                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+                kerning = texture_font_glyph_get_kerning( font, glyph, text[i-1] );
             }
             add_glyph( glyph, buffer, &markup, &pen, kerning );
         }
@@ -740,4 +740,3 @@ int main(int argc, char *argv[])
     glutMainLoop();
     return EXIT_SUCCESS;
 }
-

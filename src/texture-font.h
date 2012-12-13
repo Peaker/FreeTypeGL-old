@@ -67,30 +67,6 @@ extern "C" {
  */
 
 
-
-/**
- * A structure that hold a kerning value relatively to a charcode.
- *
- * This structure cannot be used alone since the (necessary) right charcode is
- * implicitely held by the owner of this structure.
- */
-typedef struct
-{
-    /**
-     * Left character code in the kern pair.
-     */
-    wchar_t charcode;
-
-    /**
-     * Kerning value (in fractional pixels).
-     */
-    float kerning;
-
-} kerning_t;
-
-
-
-
 /*
  * Glyph metrics:
  * --------------
@@ -132,6 +108,7 @@ enum texture_outline_type {
 };
 
 typedef struct {
+    FT_UInt glyph_index;
     wchar_t charcode;
     ivec2 size;
     /**
@@ -145,11 +122,6 @@ typedef struct {
 
     vec2 texture_pos0;
     vec2 texture_pos1;
-
-    /**
-     * A vector of kerning pairs relative to this glyph.
-     */
-    vector_t * kerning;
 
     enum texture_outline_type outline_type;
     float outline_thickness;
@@ -331,9 +303,13 @@ typedef struct
  *
  * @return x kerning value
  */
-float
-texture_glyph_get_kerning( const texture_glyph_t * self,
-                           const wchar_t charcode );
+float texture_font_get_kerning(
+    texture_font_t *,
+    FT_UInt glyph_index,
+    FT_UInt prev_glyph_index);
+
+float texture_font_glyph_get_kerning(
+    texture_font_t *, texture_glyph_t *, wchar_t prev_char);
 
 /** @} */
 

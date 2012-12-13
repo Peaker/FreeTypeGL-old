@@ -219,7 +219,7 @@ console_add_glyph( console_t *self,
     texture_glyph_t *glyph  = texture_font_get_glyph( markup->font, current );
     if( previous != L'\0' )
     {
-        self->pen.x += texture_glyph_get_kerning( glyph, previous );
+        self->pen.x += texture_font_glyph_get_kerning( font, glyph, previous );
     }
     float r = markup->foreground_color.r;
     float g = markup->foreground_color.g;

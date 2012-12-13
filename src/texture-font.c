@@ -81,7 +81,6 @@ texture_glyph_t *texture_glyph_new( void )
     self->advance = (vec2){{ 0, 0 }};
     self->texture_pos0 = (vec2){{ 0, 0 }};
     self->texture_pos1 = (vec2){{ 0, 0 }};
-    self->kerning = vector_new( sizeof(kerning_t) );
     return self;
 }
 
@@ -91,65 +90,34 @@ void
 texture_glyph_delete( texture_glyph_t *self )
 {
     assert( self );
-    vector_delete( self->kerning );
     free( self );
 }
 
-// ---------------------------------------------- texture_glyph_get_kerning ---
-float
-texture_glyph_get_kerning( const texture_glyph_t * self,
-                           const wchar_t charcode )
+float texture_font_get_kerning(
+    texture_font_t *self,
+    FT_UInt glyph_index,
+    FT_UInt prev_glyph_index)
 {
-    size_t i;
-
-    assert( self );
-    for( i=0; i<vector_size(self->kerning); ++i )
-    {
-        kerning_t * kerning = (kerning_t *) vector_get( self->kerning, i );
-        if( kerning->charcode == charcode )
-        {
-            return kerning->kerning;
-        }
+    FT_Vector kerning;
+    FT_CHECK_CALL(
+        FT_Get_Kerning,
+        ( self->face, prev_glyph_index, glyph_index, FT_KERNING_UNFITTED, &kerning ),
+        Error);
+    if(kerning.x) {
+        // 64 * 64 because of 26.6 encoding AND the transform matrix used
+        // in new_face (hres = 64)
+        return kerning.x / (float)(64.0f*64.0f);
     }
+Error:                          /* No kerning on error */
     return 0;
 }
 
-
-static void
-generate_kerning( texture_font_t *self )
+float texture_font_glyph_get_kerning(
+    texture_font_t *self, texture_glyph_t *glyph, wchar_t prev_char)
 {
-    size_t i;
-    /* For each glyph couple combination, check if kerning is necessary */
-    /* Starts at index 1 since 0 is for the special backgroudn glyph */
-    for(i=1; i<self->glyphs->size; ++i) {
-        texture_glyph_t *glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        FT_UInt glyph_index = FT_Get_Char_Index( self->face, glyph->charcode );
-        vector_clear( glyph->kerning );
-
-        size_t j;
-        for( j=1; j<self->glyphs->size; ++j ) {
-            texture_glyph_t *prev_glyph =
-                *(texture_glyph_t **) vector_get( self->glyphs, j );
-            FT_UInt prev_index = FT_Get_Char_Index( self->face, prev_glyph->charcode );
-            FT_Vector kerning;
-            FT_CHECK_CALL(FT_Get_Kerning, ( self->face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning ), Error);
-            // printf("%c(%d)-%c(%d): %ld\n",
-            //       prev_glyph->charcode, prev_glyph->charcode,
-            //       glyph_index, glyph_index, kerning.x);
-            if( kerning.x )
-            {
-                // 64 * 64 because of 26.6 encoding AND the transform matrix used
-                // in new_face (hres = 64)
-                kerning_t k = {prev_glyph->charcode, kerning.x / (float)(64.0f*64.0f)};
-                vector_push_back( glyph->kerning, &k );
-            }
-        }
-    }
-    return;
-Error:
-    abort();
+    FT_UInt prev_glyph_index = FT_Get_Char_Index(self->face, prev_char);
+    return texture_font_get_kerning(self, glyph->glyph_index, prev_glyph_index);
 }
-
 
 static float hres = 64.0f;
 
@@ -286,6 +254,7 @@ texture_font_delete( texture_font_t *self )
 typedef struct {
     FT_Glyph ft_glyph; /* Only valid if outline_type is not
                         * TEXTURE_OUTLINE_NONE */
+    FT_UInt glyph_index;
     ivec2 bearing;
     FT_Bitmap *bitmap;
     vec2 advance;
@@ -328,6 +297,7 @@ int texture_font_load_glyph(
     if( TEXTURE_OUTLINE_NONE == self->outline_type ) {
         *out = (texture_font_loaded_glyph_t){
             .ft_glyph = NULL,
+            .glyph_index = glyph_index,
             .bearing = {{ slot->bitmap_left, slot->bitmap_top }},
             .bitmap = &slot->bitmap,
             .advance = advance,
@@ -364,6 +334,7 @@ int texture_font_load_glyph(
     FT_BitmapGlyph ft_bitmap_glyph = (FT_BitmapGlyph) ft_glyph;
     *out = (texture_font_loaded_glyph_t){
         .ft_glyph = ft_glyph,
+        .glyph_index = glyph_index,
         .bearing = (ivec2){{ ft_bitmap_glyph->left, ft_bitmap_glyph->top }},
         .bitmap = &ft_bitmap_glyph->bitmap,
         .advance = advance,
@@ -418,6 +389,7 @@ texture_glyph_t **texture_font_load_glyphs(
         } else {
             texture_glyph_t *glyph = texture_glyph_new();
             glyph->charcode = charcodes[i];
+            glyph->glyph_index = loaded.glyph_index;
             glyph->size     = (ivec2){{ region.width, region.height }};
             glyph->outline_type = self->outline_type;
             glyph->outline_thickness = self->outline_thickness;
@@ -436,7 +408,6 @@ texture_glyph_t **texture_font_load_glyphs(
 
     texture_atlas_upload( self->atlas );
 
-    generate_kerning( self );
     if(missed) goto Error;
 
     return ((texture_glyph_t **) vector_back( self->glyphs )) + 1 - pushed;
@@ -487,6 +458,7 @@ texture_font_get_glyph( texture_font_t * self,
         }
         texture_glyph_t * glyph = texture_glyph_new();
         glyph->charcode = (wchar_t)(-1);
+        glyph->glyph_index = -1;
         size_t width  = self->atlas->width;
         size_t height = self->atlas->height;
         glyph->texture_pos0 = (vec2){{ (region.x+2)/(float)width, (region.y+2)/(float)height }};
