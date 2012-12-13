@@ -38,7 +38,7 @@ static void texture_glyph_delete( texture_glyph_t *self )
 void glyph_cache_init(
     glyph_cache_t *self, const ivec2 *size, int depth)
 {
-    self->atlas = texture_atlas_new(size, depth);
+    texture_atlas_init(&self->atlas, size, depth);
     self->glyphs = vector_new( sizeof(texture_glyph_t *) );
     /* -1 is a special glyph */
     glyph_cache_get_glyph(self, NULL, -1);
@@ -58,7 +58,7 @@ void glyph_cache_fini(glyph_cache_t *self)
 static texture_glyph_t *glyph_cache_load_glyph(
     glyph_cache_t *self, texture_font_t *font, const wchar_t charcode)
 {
-    size_t depth = self->atlas->depth;
+    size_t depth = self->atlas.depth;
     texture_font_loaded_glyph_t loaded;
     int rc = texture_font_load_glyph(font, charcode, depth == 3, &loaded);
     if(0 != rc) goto Error;
@@ -67,12 +67,10 @@ static texture_glyph_t *glyph_cache_load_glyph(
     size_t h = loaded.bitmap->rows;
 
     ivec4 region = texture_atlas_make_region(
-        self->atlas, w, h, loaded.bitmap->buffer, loaded.bitmap->pitch);
-    if(region.x < 0) {
-        fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
-        goto Unload_Error;
-    }
-    ivec2 size = self->atlas->size;
+        &self->atlas, w, h, loaded.bitmap->buffer, loaded.bitmap->pitch);
+    if(region.x < 0) goto Unload_Error;
+
+    ivec2 size = self->atlas.size;
     texture_glyph_t *glyph =
         texture_glyph_new(
             loaded.glyph_index, charcode,
@@ -118,16 +116,14 @@ texture_glyph_t *glyph_cache_get_glyph(glyph_cache_t * self, texture_font_t *fon
                                             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                                             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
                                             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-        ivec4 region = texture_atlas_make_region(self->atlas, 4, 4, data, 0);
-        if (region.x < 0) {
-            fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
-            return NULL;
-        }
+        ivec4 region = texture_atlas_make_region(&self->atlas, 4, 4, data, 0);
+        if (region.x < 0) return NULL;
+
         texture_glyph_t *glyph = malloc( sizeof *glyph );
         memset(glyph, 0, sizeof *glyph);
         glyph->glyph_index = -1;
         glyph->charcode = -1;
-        ivec2 size  = self->atlas->size;
+        ivec2 size  = self->atlas.size;
         glyph->texture_pos0 = (vec2){{ (region.x+2)/(float)size.x, (region.y+2)/(float)size.y }};
         glyph->texture_pos1 = (vec2){{ (region.x+3)/(float)size.x, (region.y+3)/(float)size.y }};
         vector_push_back( self->glyphs, &glyph );

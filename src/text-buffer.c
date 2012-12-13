@@ -67,13 +67,13 @@ text_buffer_delete( text_buffer_t *self )
 void
 text_buffer_render( text_buffer_t * self )
 {
-    texture_atlas_upload(self->cache.atlas);
+    texture_atlas_upload(&self->cache.atlas);
 
     glEnable( GL_BLEND );
     glEnable( GL_TEXTURE_2D );
     glColor4f( 1.0, 1.0, 1.0, 1.0);
 
-    if( self->cache.atlas->depth == 1 ) {
+    if( self->cache.atlas.depth == 1 ) {
         glDisable( GL_COLOR_MATERIAL );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
@@ -85,9 +85,9 @@ text_buffer_render( text_buffer_t * self )
         glUseProgram( self->shader );
         glUniform1i( self->shader_texture, 0 );
         glUniform3f( self->shader_pixel,
-                     1.0/self->cache.atlas->size.x,
-                     1.0/self->cache.atlas->size.y,
-                     self->cache.atlas->depth );
+                     1.0/self->cache.atlas.size.x,
+                     1.0/self->cache.atlas.size.y,
+                     self->cache.atlas.depth );
         vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
         glUseProgram( 0 );
     }

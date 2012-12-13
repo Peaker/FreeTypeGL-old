@@ -40,13 +40,9 @@
 
 
 // ------------------------------------------------------ texture_atlas_new ---
-texture_atlas_t *
-texture_atlas_new( const ivec2 *size, const size_t depth )
+void texture_atlas_init( texture_atlas_t *self, const ivec2 *size, const size_t depth )
 {
     assert( (depth == 1) || (depth == 3) || (depth == 4) );
-
-    texture_atlas_t *self = (texture_atlas_t *) malloc( sizeof(texture_atlas_t) );
-    assert (self);
     self->nodes = vector_new( sizeof(ivec3) );
     self->used = 0;
     self->size = *size;
@@ -61,28 +57,16 @@ texture_atlas_new( const ivec2 *size, const size_t depth )
     vector_push_back( self->nodes, &node );
     self->data = (unsigned char *)
         calloc( size->x*size->y*depth, sizeof(unsigned char) );
-
     assert(self->data);
-
-    return self;
 }
 
 
 // --------------------------------------------------- texture_atlas_delete ---
-void
-texture_atlas_delete( texture_atlas_t *self )
+void texture_atlas_fini(texture_atlas_t *self)
 {
-    assert( self );
-    vector_delete( self->nodes );
-    if( self->data )
-    {
-        free( self->data );
-    }
-    if( !self->id )
-    {
-        glDeleteTextures( 1, &self->id );
-    }
-    free( self );
+    vector_delete(self->nodes);
+    free( self->data );
+    if(self->id) glDeleteTextures( 1, &self->id );
 }
 
 
@@ -209,6 +193,7 @@ ivec4 texture_atlas_make_region(
         region.y = -1;
         region.width = 0;
         region.height = 0;
+        fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
         return region;
     }
 
@@ -248,7 +233,6 @@ ivec4 texture_atlas_make_region(
 void texture_atlas_clear( texture_atlas_t * self )
 {
     assert( self );
-    assert( self->data );
 
     vector_clear( self->nodes );
     self->used = 0;

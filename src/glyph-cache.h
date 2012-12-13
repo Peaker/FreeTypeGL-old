@@ -24,7 +24,7 @@ typedef struct {
 } texture_glyph_t;
 
 typedef struct {
-    texture_atlas_t *atlas;
+    texture_atlas_t atlas;
     vector_t *glyphs;           /* of texture_glyph_t */
 } glyph_cache_t;
 
