@@ -91,7 +91,7 @@ void gl_print( texture_font_t * font,
 void gl_print_at( texture_font_t * font,
                   int x, int y, wchar_t * text )
 {
-    glPushMatrix();  
+    glPushMatrix();
     glTranslatef(x, y-(int)font->height, 0);
     gl_print( font, text );
     glPopMatrix();

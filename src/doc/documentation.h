@@ -1,14 +1,14 @@
 /**
 @example demo-ansi.c
-@example demo-font.c 
-@example demo-gamma.c 
+@example demo-font.c
+@example demo-gamma.c
 @example demo-markup.c
 @example demo-makefont.c
 @example demo-console.c
-@example demo-texture.c 
-@example demo-outline.c 
-@example demo-cartoon.c 
-@example demo-benchmark.c 
+@example demo-texture.c
+@example demo-outline.c
+@example demo-cartoon.c
+@example demo-benchmark.c
 @example demo-subpixel.c
 @example demo-atb-agg.c
 @example demo-distance-field.c
@@ -57,7 +57,7 @@ vertex buffer and a single texture where necessary glyphs are tighly packed.
    ...
 
 @endcode
- 
+
 -------------------------------------------------------------------------------
 @section API Application Programming Interface
 

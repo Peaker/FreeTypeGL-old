@@ -199,7 +199,7 @@ int main( int argc, char **argv )
 
     atlas  = texture_atlas_new( 512, 512, 1 );
     font = texture_font_new( atlas, "fonts/VeraMono.ttf", 12 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    buffer = vertex_buffer_new( "v3f:t2f:c4f" );
 
     pen.y = -font->descender;
     for( i=0; i<line_count; ++i )
@@ -210,7 +210,7 @@ int main( int argc, char **argv )
     }
 
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
-    glDisable( GL_DEPTH_TEST ); 
+    glDisable( GL_DEPTH_TEST );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );

@@ -90,7 +90,7 @@ float p_primary;
 float p_secondary;
 float p_tertiary;
 
-static wchar_t text[] = 
+static wchar_t text[] =
     L"A single pixel on a color LCD is made of three colored elements \n"
     L"ordered (on various displays) either as blue, green, and red (BGR), \n"
     L"or as red, green, and blue (RGB). These pixel components, sometimes \n"
@@ -153,7 +153,7 @@ void add_glyph( const texture_glyph_t * glyph,
 // ----------------------------------------------------------- build_buffer ---
 void
 build_buffer( void )
-{ 
+{
     vec2 pen;
     size_t i;
     texture_font_t *font;
@@ -228,7 +228,7 @@ build_buffer( void )
     font->lcd_weights[3] = (unsigned char)(p_secondary*norm*256);
     font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*256);
 
-    texture_font_load_glyphs( font, 
+    texture_font_load_glyphs( font,
                               L" !\"#$%&'()*+,-./0123456789:;<=>?"
                               L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
                               L"`abcdefghijklmnopqrstuvwxyz{|}~" );
@@ -347,7 +347,7 @@ void reshape( int width, int height )
 
 // ------------------------------------------------------------------- quit ---
 void reset( void )
-{ 
+{
     p_family    = VERA;
     p_size      = 12.0;
     p_invert    = 0;
@@ -384,13 +384,13 @@ void reset( void )
 
 // ------------------------------------------------------------------- quit ---
 void quit( void )
-{ 
+{
     exit( EXIT_SUCCESS );
 }
 
 // -------------------------------------------------------------- terminate ---
 void terminate( void )
-{ 
+{
     TwTerminate();
 }
 
@@ -572,7 +572,7 @@ void TW_CALL get_tertiary( void *value, void *data )
 {
     *(float *)value = p_tertiary;
 }
- 
+
 
 // Main
 int main(int argc, char *argv[])
@@ -619,50 +619,50 @@ int main(int argc, char *argv[])
             {TAHOMA,    "Tahoma"},
             {ARIAL,     "Arial"} };
         TwType family_type = TwDefineEnum("Family", familyEV, NUM_FONTS);
-        TwAddVarCB(bar, "Family", family_type, set_family, get_family, NULL, 
+        TwAddVarCB(bar, "Family", family_type, set_family, get_family, NULL,
                    "label = 'Family'      "
                    "group = 'Font'        "
                    "help  = ' '           ");
     }
-    TwAddVarCB(bar, "Size", TW_TYPE_FLOAT, set_size, get_size, NULL, 
+    TwAddVarCB(bar, "Size", TW_TYPE_FLOAT, set_size, get_size, NULL,
                "label = 'Size' "
                "group = 'Font' "
                "min   = 6.0    "
                "max   = 24.0   "
                "step  = 0.05   "
                "help  = ' '    ");
-    TwAddVarCB(bar, "LCD filtering", TW_TYPE_BOOL32, set_lcd_filtering, get_lcd_filtering, NULL, 
+    TwAddVarCB(bar, "LCD filtering", TW_TYPE_BOOL32, set_lcd_filtering, get_lcd_filtering, NULL,
                "label = 'LCD filtering' "
               "group = 'Font'        "
                "help  = ' '             ");
 
 
     // Rendering
-    TwAddVarCB(bar, "Kerning", TW_TYPE_BOOL32, set_kerning, get_kerning, NULL, 
+    TwAddVarCB(bar, "Kerning", TW_TYPE_BOOL32, set_kerning, get_kerning, NULL,
                "label = 'Kerning'   "
                "group = 'Rendering' "
                "help  = ' '         ");
-    TwAddVarCB(bar, "Hinting", TW_TYPE_BOOL32, set_hinting, get_hinting, NULL, 
+    TwAddVarCB(bar, "Hinting", TW_TYPE_BOOL32, set_hinting, get_hinting, NULL,
                "label = 'Hinting'   "
                "group = 'Rendering' "
                "help  = ' '         ");
 
     // Color
-    TwAddVarCB(bar, "Invert", TW_TYPE_BOOL32, set_invert, get_invert, NULL, 
+    TwAddVarCB(bar, "Invert", TW_TYPE_BOOL32, set_invert, get_invert, NULL,
                "label = 'Invert' "
                "group = 'Color'  "
                "help  = ' '      ");
-    
+
     // Glyph
-    TwAddVarCB(bar, "Width", TW_TYPE_FLOAT, set_width, get_width, NULL, 
+    TwAddVarCB(bar, "Width", TW_TYPE_FLOAT, set_width, get_width, NULL,
                "label = 'Width' "
                "group = 'Glyph' "
                "min   = 0.75    "
-               "max   = 1.25    " 
+               "max   = 1.25    "
                "step  = 0.01    "
                "help  = ' '     ");
 
-    TwAddVarCB(bar, "Interval", TW_TYPE_FLOAT, set_interval, get_interval, NULL, 
+    TwAddVarCB(bar, "Interval", TW_TYPE_FLOAT, set_interval, get_interval, NULL,
                "label = 'Spacing' "
                "group = 'Glyph'   "
                "min   = -0.2      "
@@ -670,7 +670,7 @@ int main(int argc, char *argv[])
                "step  = 0.01      "
                "help  = ' '       " );
 
-    TwAddVarCB(bar, "Faux italic", TW_TYPE_FLOAT, set_faux_italic, get_faux_italic, NULL, 
+    TwAddVarCB(bar, "Faux italic", TW_TYPE_FLOAT, set_faux_italic, get_faux_italic, NULL,
                "label = 'Faux italic' "
                "group = 'Glyph'       "
                "min   = -30.0         "
@@ -706,7 +706,7 @@ int main(int argc, char *argv[])
     TwAddSeparator(bar, "",
                    "group = 'Energy distribution' " );
 
-    TwAddVarCB(bar, "Gamma", TW_TYPE_FLOAT, set_gamma, get_gamma, NULL, 
+    TwAddVarCB(bar, "Gamma", TW_TYPE_FLOAT, set_gamma, get_gamma, NULL,
                "label = 'Gamma correction'    "
                "group = 'Energy distribution' "
                "min   = 0.50                  "
@@ -723,7 +723,7 @@ int main(int argc, char *argv[])
 
     atlas_gray = texture_atlas_new( 512, 256, 1 );
     atlas_rgb  = texture_atlas_new( 512, 256, 3 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f" ); 
+    buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f" );
     reset();
 
     // Create the shader

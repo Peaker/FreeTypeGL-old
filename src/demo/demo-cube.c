@@ -55,7 +55,7 @@ void init( void )
     GLfloat specular[] = {0.0f, 0.0f, 0.0f, 1.0f};
     glPolygonOffset( 1, 1 );
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
-    glEnable( GL_DEPTH_TEST ); 
+    glEnable( GL_DEPTH_TEST );
     glEnable( GL_COLOR_MATERIAL );
     glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );

@@ -163,9 +163,9 @@ int main( int argc, char **argv )
     texture_font_t * small = texture_font_new( atlas, "fonts/Vera.ttf", 18);
     texture_font_t * title = texture_font_new( atlas, "fonts/Vera.ttf", 32);
 
-    text_buffer  = vertex_buffer_new( "v3f:t2f:c4f" ); 
-    line_buffer  = vertex_buffer_new( "v2f:c4f" ); 
-    point_buffer = vertex_buffer_new( "v2f:c4f" ); 
+    text_buffer  = vertex_buffer_new( "v3f:t2f:c4f" );
+    line_buffer  = vertex_buffer_new( "v2f:c4f" );
+    point_buffer = vertex_buffer_new( "v2f:c4f" );
 
     vec2 pen, origin;
 
@@ -179,10 +179,10 @@ int main( int argc, char **argv )
     pen.y = 560;
     add_text( text_buffer, title, L"Glyph metrics", &black, &pen );
 
-    point_t vertices[] = 
+    point_t vertices[] =
         {   // Baseline
             {0.1*width, origin.y, black},
-            {0.9*width, origin.y, black}, 
+            {0.9*width, origin.y, black},
 
             // Top line
             {0.1*width, origin.y + glyph->offset_y, black},
@@ -215,7 +215,7 @@ int main( int argc, char **argv )
             // Advance_x
             {width/2-glyph->width/2-glyph->offset_x, 0.2*height, blue},
             {width/2-glyph->width/2-glyph->offset_x+glyph->advance_x, 0.2*height, blue},
-            
+
             // Offset_x
             {width/2-glyph->width/2-glyph->offset_x, 0.85*height, blue},
             {width/2-glyph->width/2, 0.85*height, blue},

@@ -92,7 +92,7 @@ void add_text( vertex_buffer_t * buffer, vec2 * pen, ... )
     markup_t *markup;
     wchar_t *text;
     va_list args;
-    va_start ( args, pen ); 
+    va_start ( args, pen );
 
     do {
         markup = va_arg( args, markup_t * );
@@ -164,7 +164,7 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
 
     atlas = texture_atlas_new( 512, 512, 1 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    buffer = vertex_buffer_new( "v3f:t2f:c4f" );
 
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};

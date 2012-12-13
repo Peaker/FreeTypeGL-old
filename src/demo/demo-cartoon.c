@@ -137,7 +137,7 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
 
     atlas = texture_atlas_new( 1024, 1024, 1 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    buffer = vertex_buffer_new( "v3f:t2f:c4f" );
     texture_font_t *font = texture_font_new( atlas, "fonts/ObelixPro.ttf", 128 );
 
     vec2 pen    = {{30, 50}};

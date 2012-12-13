@@ -79,7 +79,7 @@ struct _console_t {
     size_t         cursor;
     markup_t       markup[MARKUP_COUNT];
     vertex_buffer_t * buffer;
-    vec2           pen; 
+    vec2           pen;
     void (*handlers[4])( struct _console_t *, wchar_t * );
 };
 typedef struct _console_t console_t;
@@ -112,7 +112,7 @@ console_new( void )
     self->pen.x = self->pen.y = 0;
 
     texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
- 
+
     vec4 white = {{1,1,1,1}};
     vec4 black = {{0,0,0,1}};
     vec4 none = {{0,0,1,0}};
@@ -240,7 +240,7 @@ console_add_glyph( console_t *self,
                             { x1,y1,0,  s1,t1,  r,g,b,a },
                             { x1,y0,0,  s1,t0,  r,g,b,a } };
     vertex_buffer_push_back( self->buffer, vertices, 4, indices, 6 );
-    
+
     self->pen.x += glyph->advance_x;
     self->pen.y += glyph->advance_y;
 }
@@ -429,7 +429,7 @@ console_process( console_t *self,
         if( len < MAX_LINE_LENGTH )
         {
             memmove( self->input + self->cursor+1,
-                     self->input + self->cursor, 
+                     self->input + self->cursor,
                      (len - self->cursor+1)*sizeof(wchar_t) );
             self->input[self->cursor] = (wchar_t) key;
             self->cursor++;
@@ -470,7 +470,7 @@ console_process( console_t *self,
         else if( strcmp( action, "delete" ) == 0 )
         {
             memmove( self->input + self->cursor,
-                     self->input + self->cursor+1, 
+                     self->input + self->cursor+1,
                      (len - self->cursor)*sizeof(wchar_t) );
         }
         else if( strcmp( action, "backspace" ) == 0 )
@@ -478,7 +478,7 @@ console_process( console_t *self,
             if( self->cursor > 0 )
             {
                 memmove( self->input + self->cursor-1,
-                         self->input + self->cursor, 
+                         self->input + self->cursor,
                          (len - self->cursor+1)*sizeof(wchar_t) );
                 self->cursor--;
             }
@@ -491,7 +491,7 @@ console_process( console_t *self,
                 self->input[self->cursor] = L'\0';
                 fwprintf(stderr, L"Kill ring: %ls\n", self->killring);
             }
-            
+
         }
         else if( strcmp( action, "yank" ) == 0 )
         {
@@ -499,7 +499,7 @@ console_process( console_t *self,
             if( (len + l) < MAX_LINE_LENGTH )
             {
                 memmove( self->input + self->cursor + l,
-                         self->input + self->cursor, 
+                         self->input + self->cursor,
                          (len - self->cursor)*sizeof(wchar_t) );
                 memcpy( self->input + self->cursor,
                         self->killring, l*sizeof(wchar_t));
@@ -553,15 +553,15 @@ on_key_press ( unsigned char key, int x, int y )
         console_process( console, "home", 0 );
     }
     else if (key == 4)
-    { 
+    {
         console_process( console, "delete", 0 );
     }
     else if (key == 5)
-    { 
+    {
         console_process( console, "end", 0 );
     }
     else if (key == 8)
-    { 
+    {
         console_process( console, "backspace", 0 );
     }
     else if (key == 9)
@@ -696,7 +696,7 @@ main( int argc, char **argv )
     glutSpecialFunc( on_special_key_press );
     glutReshapeWindow( 600,400 );
 
-    lines_buffer = vertex_buffer_new( "v2f:c4f" ); 
+    lines_buffer = vertex_buffer_new( "v2f:c4f" );
     console = console_new();
     console_print( console,
                    L"OpenGL Freetype console\n"
@@ -707,7 +707,7 @@ main( int argc, char **argv )
     console_connect( console, "history-next", console_history_next );
 
     glClearColor( 1.00, 1.00, 1.00, 1.00 );
-    glDisable( GL_DEPTH_TEST ); 
+    glDisable( GL_DEPTH_TEST );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
