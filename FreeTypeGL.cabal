@@ -40,7 +40,7 @@ Library
   ghc-options: -Wall
   include-dirs: src
   if os(windows)
-    include-dirs: windows/include src/windows/freetype
+    include-dirs: windows/include
 
   if flag(use_font_config)
     cc-options: -DUSE_FONT_CONFIG
@@ -75,13 +75,4 @@ Executable hellobye
   else
     Buildable:     True
     Build-depends: base > 3 && < 5, FreeTypeGL, GLFW-b, OpenGL
-    ghc-options:   -Wall
-
-Executable bench
-  Main-is:       demos/bench.hs
-  if !flag(examples)
-    Buildable:     False
-  else
-    Buildable:     True
-    Build-depends: base > 3 && < 5, FreeTypeGL, GLFW-b, OpenGL, criterion
     ghc-options:   -Wall
