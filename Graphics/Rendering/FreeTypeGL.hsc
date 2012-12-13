@@ -95,5 +95,6 @@ renderText = ITB.render . trBuffer
 textRendererSize :: TextRenderer -> Vector2 Float
 textRendererSize = trSize
 
-textSize :: Font -> String -> IO (Vector2 Float)
-textSize = ITF.textSize . fFont
+textSize :: Font -> String -> Vector2 Float
+textSize font str =
+  unsafePerformIO $ ITF.textSize (fFont font) str
