@@ -262,20 +262,14 @@ print( text_buffer_t * buffer, vec2 * pen,
         {
             int seq_size = (seq_end-seq_start)+1;
             wchar_t * text_start = p;
-            int text_size = 0;
-            if( start )
-            {
-                text_size = start-p;
+            if( start ) {
                 p = start-1;
-            }
-            else
-            {
-                text_size = text+wcslen(text)-p;
+            } else {
                 p = text+wcslen(text);
             }
             ansi_to_markup(seq_start, seq_size, markup );
             markup->font = font_manager_get_from_markup( text_buffer->manager, markup );
-            int rc = text_buffer_add_text( text_buffer, pen, markup, text_start, text_size );
+            int rc = text_buffer_add_text( text_buffer, pen, markup, text_start );
             assert(0 == rc);
         }
     }

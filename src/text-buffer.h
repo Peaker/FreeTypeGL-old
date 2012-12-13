@@ -183,7 +183,7 @@ typedef struct {
   text_buffer_add_text( text_buffer_t * self,
                         vec2 * pen, markup_t * markup,
                         texture_font_t * font,
-                        wchar_t * text, size_t length );
+                        wchar_t * text );
 
 
 /** @} */

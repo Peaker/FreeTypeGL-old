@@ -6,8 +6,8 @@ module Graphics.Rendering.FreeTypeGL.Internal.TextBuffer
 
 import Control.Applicative ((<$>))
 import Foreign (FunPtr, Ptr)
-import Foreign.C.String (CWString, withCWStringLen)
-import Foreign.C.Types (CSize(..), CUInt(..), CInt(..))
+import Foreign.C.String (CWString, withCWString)
+import Foreign.C.Types (CUInt(..), CInt(..))
 import Foreign.ForeignPtr (ForeignPtr, withForeignPtr, newForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Marshal.Error (throwIf_)
@@ -30,7 +30,7 @@ foreign import ccall "text_buffer_render"
 type Pen = Vector2 Float
 
 foreign import ccall "text_buffer_add_text"
-  c_text_buffer_add_text :: Ptr TextBuffer -> Ptr Pen -> Ptr Markup -> Ptr TextureFont -> CWString -> CSize -> IO CInt
+  c_text_buffer_add_text :: Ptr TextBuffer -> Ptr Pen -> Ptr Markup -> Ptr TextureFont -> CWString -> IO CInt
 
 foreign import ccall "&text_buffer_delete"
   c_text_buffer_delete :: FunPtr (Ptr TextBuffer -> IO ())
@@ -50,8 +50,7 @@ addText textBuffer markup font pen str =
   throwIf_ (/= 0)
   ((++ "Most likely cause: Out of atlas memory. Try to enlarge the atlas.") .
    ("text_buffer_add_text returned: " ++) . show) .
-  withCWStringLen str $ \(strPtr, len) ->
+  withCWString str $ \strPtr ->
   withForeignPtr textBuffer $ \textBufferPtr ->
   withForeignPtr font $ \fontPtr ->
-  c_text_buffer_add_text textBufferPtr pen markup fontPtr strPtr $
-  fromIntegral len
+  c_text_buffer_add_text textBufferPtr pen markup fontPtr strPtr

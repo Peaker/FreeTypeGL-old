@@ -252,15 +252,12 @@ text_buffer_add_wchar( text_buffer_t * self,
 }
 
 // ----------------------------------------------------------------------------
-int
-text_buffer_add_text( text_buffer_t * self,
-                      vec2 * pen, markup_t * markup,
-                      texture_font_t * font,
-                      wchar_t * text, size_t length )
+int text_buffer_add_text(
+    text_buffer_t * self, vec2 * pen, markup_t * markup,
+    texture_font_t * font, wchar_t * text )
 {
     vertex_buffer_t * buffer = self->buffer;
 
-    if( 0 == length ) length = wcslen(text);
     if( 0 == vertex_buffer_size( self->buffer ) ) self->origin = *pen;
 
     if( font->ascender > self->line_ascender ) {
@@ -290,7 +287,7 @@ text_buffer_add_text( text_buffer_t * self,
     }
 
     size_t i;
-    for( i=1; i<length; ++i ) {
+    for( i=1; text[i]; ++i ) {
         if(0 != (rc = text_buffer_add_wchar( self, pen, markup, font, text[i], text[i-1] ))) {
             return rc;
         }
