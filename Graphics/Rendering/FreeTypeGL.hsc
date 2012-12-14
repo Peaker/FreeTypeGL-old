@@ -11,7 +11,6 @@ module Graphics.Rendering.FreeTypeGL
   , initialize
   ) where
 
-import Control.Applicative
 import Foreign.C.String (withCString)
 import Foreign.C.Types (CInt(..))
 import Foreign.ForeignPtr (ForeignPtr)
@@ -78,16 +77,17 @@ data TextRenderer = TextRenderer
   , trSize :: Vector2 Float
   }
 
-textRenderer :: Vector2 Float -> Markup -> Font -> String -> TextRenderer
-textRenderer pos markup (Font shader font) str = unsafePerformIO $
+-- | Make a 'TextRenderer' for a given font.
+textRenderer :: Markup -> Font -> String -> TextRenderer
+textRenderer markup (Font shader font) str = unsafePerformIO $
   alloca $ \pen ->
   alloca $ \markupPtr -> do
-    poke pen pos
+    poke pen (Vector2 0 0)
     poke markupPtr markup
     textBuffer <- ITB.new shader (Vector2 512 512) 1
     ITB.addText textBuffer markupPtr font pen str
     newPos <- peek pen
-    return $ TextRenderer textBuffer ((-) <$> newPos <*> pos)
+    return $ TextRenderer textBuffer newPos
 
 renderText :: TextRenderer -> IO ()
 renderText = ITB.render . trBuffer
