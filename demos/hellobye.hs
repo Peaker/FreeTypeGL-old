@@ -30,12 +30,9 @@ reshape = do
 
 helloMarkup :: FGL.Markup
 helloMarkup = FGL.Markup
-  { FGL.rise = 0
-  , FGL.spacing = 0
-  , FGL.gamma = 1.0
+  { FGL.gamma = 1.0
   , FGL.foreground_color = Color4 1 0 0 1
   , FGL.background_color = Color4 0.3 0.3 0.3 0.3
-  , FGL.outline = Just $ Color4 0.1 0.1 0.1 0.8
   , FGL.underline = Just $ Color4 0.8 0.3 0.2 0.3
   , FGL.overline = Just $ Color4 0.1 0.5 0.1 1
   , FGL.strikethrough = Nothing

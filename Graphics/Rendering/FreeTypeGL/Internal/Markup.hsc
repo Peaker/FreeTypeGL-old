@@ -19,12 +19,9 @@ pokeColor ptr (Color4 r g b a) = mapM_ p $ zip [0..] [r, g, b, a]
 
 
 data Markup = Markup
-  { rise :: Float
-  , spacing :: Float
-  , gamma :: Float
+  { gamma :: Float
   , foreground_color :: Color4 Float
   , background_color :: Color4 Float
-  , outline :: Maybe (Color4 Float)
   , underline :: Maybe (Color4 Float)
   , overline :: Maybe (Color4 Float)
   , strikethrough :: Maybe (Color4 Float)
@@ -32,12 +29,9 @@ data Markup = Markup
 
 noMarkup :: Markup
 noMarkup = Markup
-  { rise = 0.0
-  , spacing = 0.0
-  , gamma = 1.0
+  { gamma = 1.0
   , foreground_color = Color4 1 1 1 1
   , background_color = Color4 0 0 0 0
-  , outline = Nothing
   , underline = Nothing
   , overline = Nothing
   , strikethrough = Nothing
@@ -48,9 +42,7 @@ noMarkup = Markup
 applyTuple :: (a -> b, a -> c) -> a -> (b, c)
 applyTuple (fx, fy) arg = (fx arg, fy arg)
 
-outlinePtrs, underlinePtrs, overlinePtrs, strikethroughPtrs ::
-  Ptr Markup -> (Ptr CInt, Ptr Float)
-outlinePtrs       = applyTuple ((#ptr markup_t, outline      ), (#ptr markup_t, outline_color))
+underlinePtrs, overlinePtrs, strikethroughPtrs :: Ptr Markup -> (Ptr CInt, Ptr Float)
 underlinePtrs     = applyTuple ((#ptr markup_t, underline    ), (#ptr markup_t, underline_color))
 overlinePtrs      = applyTuple ((#ptr markup_t, overline     ), (#ptr markup_t, overline_color))
 strikethroughPtrs = applyTuple ((#ptr markup_t, strikethrough), (#ptr markup_t, strikethrough_color))
@@ -61,8 +53,6 @@ instance Storable Markup where
   sizeOf _    = #size markup_t
   alignment _ = #alignment markup_t
   peek ptr = do
-    rise' <- (#peek markup_t, rise) ptr
-    spacing' <- (#peek markup_t, spacing) ptr
     gamma' <- (#peek markup_t, gamma) ptr
     foreground_color' <- peekColor $ (#ptr markup_t, foreground_color) ptr
     background_color' <- peekColor $ (#ptr markup_t, background_color) ptr
@@ -73,20 +63,17 @@ instance Storable Markup where
         case b of
           0 -> return Nothing
           _ -> Just <$> peekColor colorPtr
-    outline' <- peekAnnotation outlinePtrs
     underline' <- peekAnnotation underlinePtrs
     overline' <- peekAnnotation overlinePtrs
     strikethrough' <- peekAnnotation strikethroughPtrs
     return $
-      Markup rise' spacing' gamma'
+      Markup gamma'
       foreground_color' background_color'
-      outline' underline' overline' strikethrough'
+      underline' overline' strikethrough'
   poke ptr
-    (Markup rise' spacing' gamma'
+    (Markup gamma'
       foreground_color' background_color'
-      outline' underline' overline' strikethrough') = do
-    (#poke markup_t, rise) ptr rise'
-    (#poke markup_t, spacing) ptr spacing'
+      underline' overline' strikethrough') = do
     (#poke markup_t, gamma) ptr gamma'
     pokeColor ((#ptr markup_t, foreground_color) ptr) foreground_color'
     pokeColor ((#ptr markup_t, background_color) ptr) background_color'
@@ -99,7 +86,6 @@ instance Storable Markup where
             pokeColor colorPtr color
         where
           (boolPtr, colorPtr) = ptrs ptr
-    pokeAnnotation outlinePtrs outline'
     pokeAnnotation underlinePtrs underline'
     pokeAnnotation overlinePtrs overline'
     pokeAnnotation strikethroughPtrs strikethrough'

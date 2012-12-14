@@ -62,7 +62,6 @@ extern "C" {
  *     .size = 24.0,
  *     .bold = 0,
  *     .italic = 0,
- *     .rise = 0.0,
  *     .spacing = 1.0,
  *     .gamma = 1.0,
  *     .foreground_color = black, .background_color    = none,
@@ -85,11 +84,6 @@ extern "C" {
 typedef struct
 {
     /**
-     * Vertical displacement from the baseline.
-     */
-    float rise;
-
-    /**
      * Spacing between letters.
      */
     float spacing;
@@ -108,16 +102,6 @@ typedef struct
      * Background color.
      */
     vec4 background_color;
-
-    /**
-     * Whether outline is active.
-     */
-    int outline;
-
-    /**
-     * Outline color.
-     */
-    vec4 outline_color;
 
     /**
      * Whether underline is active.
