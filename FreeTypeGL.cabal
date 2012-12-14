@@ -1,7 +1,27 @@
 Name:                FreeTypeGL
 Version:             0.0.1
-Synopsis:            Haskell binding for FreeType-GL library
-Description:         Wrapper around FreeType-GL library.
+Synopsis:            Haskell fonts with OpenGL
+
+Description:         Based on the freetype-gl library, with large
+                     modifications.
+
+                     This is similar to the FTGL library, but avoids
+                     C++, which makes it easier to wrap and work with
+                     in Haskell-land.
+
+                     This library is completely stand-alone (comes
+                     with the required C sources), so you don't need
+                     to install any C library prior to installing
+                     this. cabal intall FreeTypeGL should work fine.
+
+                     Unfortunately, it seems not to perform as well as
+                     FTGL on some setups.
+
+                     NOTE: Most of the demos and C-side documentation
+                     are out-of-date, as the C side was heavily
+                     modified, without updating many of the demos or
+                     the C documentation.
+
 License:             BSD3
 License-file:        LICENSE
 Author:              Eyal Lotem <eyal.lotem@gmail.com>
@@ -9,6 +29,11 @@ Maintainer:          Eyal Lotem <eyal.lotem@gmail.com>
 Category:            Graphics
 Build-type:          Simple
 Extra-source-files:  src/*.c
+                     src/demo/*.c
+                     src/fonts/*.ttf src/fonts/VERA-COPYRIGHT
+                     shaders/*.vert shaders/*.frag
+                     windows/glew.c
+                     windows/include/GL/glew.h windows/include/GL/wglew.h windows/include/GL/glxew.h
 Data-files:          shaders/text.frag shaders/text.vert
 
 Cabal-version:       >=1.8
