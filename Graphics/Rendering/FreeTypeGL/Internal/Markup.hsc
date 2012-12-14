@@ -17,16 +17,24 @@ pokeColor ptr (Color4 r g b a) = mapM_ p $ zip [0..] [r, g, b, a]
   where
     p (off, val) = pokeElemOff ptr off val
 
-
+-- | A Markup record defines what text effects to combine when
+-- rendering text
 data Markup = Markup
   { gamma :: Float
+    -- ^ Not implemented yet. Set to 1.0
   , foreground_color :: Color4 Float
+    -- ^ Foreground color
   , background_color :: Color4 Float
+    -- ^ Background color
   , underline :: Maybe (Color4 Float)
+    -- ^ Optional underline color
   , overline :: Maybe (Color4 Float)
+    -- ^ Optional overline color
   , strikethrough :: Maybe (Color4 Float)
+    -- ^ Optional strikethrough color
   }
 
+-- | Default no-markup (White text on transparent background)
 noMarkup :: Markup
 noMarkup = Markup
   { gamma = 1.0

@@ -4,6 +4,9 @@ module Graphics.Rendering.FreeTypeGL.Internal.Shader(Shader(..), load) where
 import Foreign.C.String (CString, withCString)
 import Foreign.C.Types (CUInt(..))
 
+-- | A 'Shader' represents a GL program to render text. Needs to be
+-- loaded just once for all fonts. Use
+-- 'Graphics.Rendering.FreeTypeGL.newShader' to make one.
 newtype Shader = Shader CUInt
 
 foreign import ccall "shader_load"

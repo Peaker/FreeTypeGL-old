@@ -1,22 +1,22 @@
 Name:                FreeTypeGL
 Version:             0.0.1
-Synopsis:            Haskell fonts with OpenGL
+Synopsis:            Loadable texture fonts for OpenGL.
 
 Description:         Based on the freetype-gl library, with large
                      modifications.
-
-                     This is similar to the FTGL library, but avoids
-                     C++, which makes it easier to wrap and work with
+                     .
+                     This is similar to the FTGL (<http://hackage.haskell.org/package/FTGL>)
+                     library, but avoids C++, which makes it easier to wrap and work with
                      in Haskell-land.
-
+                     .
                      This library is completely stand-alone (comes
                      with the required C sources), so you don't need
                      to install any C library prior to installing
                      this. cabal intall FreeTypeGL should work fine.
-
+                     .
                      Unfortunately, it seems not to perform as well as
                      FTGL on some setups.
-
+                     .
                      NOTE: Most of the demos and C-side documentation
                      are out-of-date, as the C side was heavily
                      modified, without updating many of the demos or
