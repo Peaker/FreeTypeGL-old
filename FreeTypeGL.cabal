@@ -1,5 +1,5 @@
 Name:                FreeTypeGL
-Version:             0.0.1
+Version:             0.0.2
 Synopsis:            Loadable texture fonts for OpenGL.
 
 Description:         Based on the freetype-gl library, with large
