@@ -9,11 +9,6 @@ Description:         Based on the freetype-gl library, with large
                      library, but avoids C++, which makes it easier to wrap and work with
                      in Haskell-land.
                      .
-                     This library is completely stand-alone (comes
-                     with the required C sources), so you don't need
-                     to install any C library prior to installing
-                     this. cabal intall FreeTypeGL should work fine.
-                     .
                      Unfortunately, it seems not to perform as well as
                      FTGL on some setups.
                      .
